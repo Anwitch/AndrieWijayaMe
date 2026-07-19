@@ -50,6 +50,12 @@ export default function EditableText({
     setIsEditing(false);
   };
 
+  const startEditing = () => {
+    setError(null);
+    setCurrentValue(value);
+    setIsEditing(true);
+  };
+
   const insertText = (before: string, after: string = "") => {
     if (!textareaRef.current) return;
 
@@ -183,26 +189,27 @@ export default function EditableText({
 
   return (
     <div className="group relative">
-      <div className="prose prose-slate max-w-none prose-p:leading-relaxed prose-p:text-gray-800 prose-strong:text-black prose-p:mb-4">
+      <div className="prose prose-slate max-w-none pr-20 prose-p:leading-relaxed prose-p:text-gray-800 prose-strong:text-black prose-p:mb-4">
         {value ? (
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>
         ) : (
-          <div className="text-gray-300 italic">
+          <button
+            type="button"
+            onClick={startEditing}
+            className="text-left text-gray-400 italic hover:text-black transition-colors"
+          >
             No content set for {label}. Click to edit.
-          </div>
+          </button>
         )}
       </div>
       <button
         type="button"
-        onClick={() => {
-          setError(null);
-          setCurrentValue(value);
-          setIsEditing(true);
-        }}
-        className="absolute right-0 top-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 p-2 bg-white shadow-sm border border-gray-100 text-gray-400 hover:text-black transition-all"
+        onClick={startEditing}
+        className="absolute right-0 top-0 flex items-center gap-1 p-2 bg-white shadow-sm border border-gray-200 text-gray-500 hover:border-black hover:text-black transition-colors font-mono text-[10px] uppercase tracking-widest"
         title={`Edit ${label}`}
       >
         <Edit2 size={14} />
+        Edit
       </button>
     </div>
   );
