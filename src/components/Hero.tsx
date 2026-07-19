@@ -18,7 +18,7 @@ export default function Hero({ isPublic = false }: { isPublic?: boolean }) {
       <div className="flex-shrink-0">
         <div className="w-48 h-48 md:w-64 md:h-64 overflow-hidden rounded-full border-4 border-gray-100 shadow-sm">
           <Image
-            src="/andrie-profile.png"
+            src="/FotoAndrieGantengKacamata.webp"
             alt="Andrie Wijaya"
             width={256}
             height={256}
