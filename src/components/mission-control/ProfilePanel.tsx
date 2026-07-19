@@ -68,6 +68,26 @@ export default function ProfilePanel({ profile }: ProfilePanelProps) {
             value={profile?.status ?? ""}
             onSave={(status) => updateProfile({ status })}
           />
+          <ProfileField
+            label="Specialization"
+            value={profile?.specialization ?? ""}
+            onSave={(specialization) => updateProfile({ specialization })}
+          />
+          <ProfileField
+            label="Current Focus"
+            value={profile?.currentFocus ?? ""}
+            onSave={(currentFocus) => updateProfile({ currentFocus })}
+          />
+          <ProfileField
+            label="X Profile URL"
+            value={profile?.xUrl ?? ""}
+            onSave={(xUrl) => updateProfile({ xUrl })}
+          />
+          <ProfileField
+            label="Instagram Profile URL"
+            value={profile?.instagramUrl ?? ""}
+            onSave={(instagramUrl) => updateProfile({ instagramUrl })}
+          />
         </div>
       </div>
     </section>

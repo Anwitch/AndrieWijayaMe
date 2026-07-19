@@ -18,6 +18,10 @@ export default defineSchema({
     tagline: v.string(),
     location: v.string(),
     status: v.string(),
+    specialization: v.optional(v.string()),
+    currentFocus: v.optional(v.string()),
+    xUrl: v.optional(v.string()),
+    instagramUrl: v.optional(v.string()),
   }),
   posts: defineTable({
     title: v.string(),

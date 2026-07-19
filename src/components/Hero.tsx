@@ -36,12 +36,28 @@ export default function Hero({ isPublic = false }: { isPublic?: boolean }) {
           </h1>
           {/* Ikon Media Sosial */}
           <div className="flex gap-4">
-            <div className="bg-black text-white p-2 rounded-full w-10 h-10 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-gray-800 transition-colors">
-              X
-            </div>
-            <div className="bg-black text-white p-2 rounded-full w-10 h-10 flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-gray-800 transition-colors">
-              IG
-            </div>
+            {profile?.xUrl && (
+              <a
+                href={profile.xUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Andrie Wijaya on X"
+                className="bg-black text-white p-2 rounded-full w-10 h-10 flex items-center justify-center text-xs font-bold hover:bg-gray-800 transition-colors"
+              >
+                X
+              </a>
+            )}
+            {profile?.instagramUrl && (
+              <a
+                href={profile.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Andrie Wijaya on Instagram"
+                className="bg-black text-white p-2 rounded-full w-10 h-10 flex items-center justify-center text-xs font-bold hover:bg-gray-800 transition-colors"
+              >
+                IG
+              </a>
+            )}
           </div>
         </div>
         <div className="text-xl md:text-2xl text-gray-600 mt-6 leading-relaxed max-w-2xl">

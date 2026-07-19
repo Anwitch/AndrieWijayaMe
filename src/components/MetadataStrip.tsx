@@ -25,13 +25,13 @@ export default function MetadataStrip({
     },
     {
       label: "Specialization",
-      value: "Full-stack Development",
-      isStatic: true,
+      value: profile?.specialization ?? "Full-stack Development",
+      key: "specialization",
     },
     {
       label: "Current Focus",
-      value: "Next.js & Cloud Architecture",
-      isStatic: true,
+      value: profile?.currentFocus ?? "Next.js & Cloud Architecture",
+      key: "currentFocus",
     },
   ];
 
@@ -43,7 +43,7 @@ export default function MetadataStrip({
             {item.label}
           </span>
           <span className="text-sm font-medium text-black">
-            {item.isStatic || isPublic ? (
+            {isPublic ? (
               item.value
             ) : (
               <EditableText
