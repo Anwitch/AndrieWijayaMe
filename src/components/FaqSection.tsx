@@ -45,7 +45,7 @@ function faqPageSchema() {
 
 export default function FaqSection() {
   return (
-    <section id="faq" className="mt-24">
+    <section id="faq" className="mt-24 scroll-mt-24">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageSchema()) }}

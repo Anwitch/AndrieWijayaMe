@@ -80,7 +80,7 @@ export default function HomeContent({
 
           {/* Konten Utama (Ringkasan) */}
           <article className="max-w-none">
-            <section id="ringkasan">
+            <section id="ringkasan" className="scroll-mt-24">
               <SectionHeading title="Ringkasan" />
               <div
                 className="prose max-w-none text-lg leading-relaxed text-ink-secondary
@@ -102,7 +102,7 @@ export default function HomeContent({
             </section>
 
             {/* Proyek Pilihan */}
-            <section id="proyek" className="mt-24">
+            <section id="proyek" className="mt-24 scroll-mt-24">
               <SectionHeading
                 title="Proyek Pilihan"
                 aside={`${projects?.length ?? 0} FEATURED MISSIONS`}
