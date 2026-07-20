@@ -8,7 +8,7 @@ export default function Navbar() {
   const links = [
     {
       name: settings.navAboutLabel,
-      href: "/#ringkasan",
+      href: "/about",
       visible: settings.navAboutVisible,
     },
     {

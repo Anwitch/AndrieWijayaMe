@@ -7,14 +7,18 @@ const PROFILE_IMAGE = `${SITE_URL}/FotoAndrieGantengKacamata.webp`;
  * schema.org Person — the primary entity for a personal brand. Helps search and
  * AI engines resolve "who is Andrie Wijaya" and cite him accurately.
  */
-export function personSchema(settings: SiteSettings, sameAs: string[] = []) {
+export function personSchema(
+  settings: SiteSettings,
+  sameAs: string[] = [],
+  image = PROFILE_IMAGE,
+) {
   return {
     "@context": "https://schema.org",
     "@type": "Person",
     "@id": `${SITE_URL}/#person`,
     name: settings.siteName,
     url: SITE_URL,
-    image: PROFILE_IMAGE,
+    image,
     jobTitle: "Product Thinker & Problem Solver",
     description: settings.seoDescription,
     knowsAbout: [
@@ -32,6 +36,20 @@ export function personSchema(settings: SiteSettings, sameAs: string[] = []) {
       addressCountry: "ID",
     },
     ...(sameAs.length > 0 ? { sameAs } : {}),
+  };
+}
+
+/** schema.org BreadcrumbList — helps engines show the page's place in the site. */
+export function breadcrumbSchema(items: Array<{ name: string; path: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: `${SITE_URL}${item.path}`,
+    })),
   };
 }
 

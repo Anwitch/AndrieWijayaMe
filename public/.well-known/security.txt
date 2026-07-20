@@ -1,0 +1,4 @@
+Contact: mailto:andrie.wijaya.contact@gmail.com
+Expires: 2027-07-21T00:00:00.000Z
+Preferred-Languages: id, en
+Canonical: https://anwitch.me/.well-known/security.txt

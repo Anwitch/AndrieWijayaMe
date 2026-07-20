@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/site-settings.server";
 import { SITE_URL } from "@/lib/site-url";
+import { breadcrumbSchema } from "@/lib/structured-data";
 
 async function getPost(slug: string) {
   try {
@@ -64,7 +65,12 @@ export default async function PostDetailPage({
   }
 
   const url = `${SITE_URL}/writing/${post.slug}`;
-  const jsonLd = {
+  const breadcrumb = breadcrumbSchema([
+    { name: "Beranda", path: "/" },
+    { name: "Tulisan", path: "/writing" },
+    { name: post.title, path: `/writing/${post.slug}` },
+  ]);
+  const blogPosting = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
@@ -84,7 +90,9 @@ export default async function PostDetailPage({
     <PublicShell>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([blogPosting, breadcrumb]),
+        }}
       />
       <main className="max-w-3xl mx-auto px-6 py-16 md:py-24 animate-fade-in-up">
         <Link

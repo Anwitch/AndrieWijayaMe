@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { SITE_URL } from "@/lib/site-url";
+import { breadcrumbSchema } from "@/lib/structured-data";
 
 const title = "Tulisan";
 const description =
@@ -20,5 +21,17 @@ export const metadata: Metadata = {
 };
 
 export default function WritingLayout({ children }: { children: ReactNode }) {
-  return children;
+  const breadcrumb = breadcrumbSchema([
+    { name: "Beranda", path: "/" },
+    { name: "Tulisan", path: "/writing" },
+  ]);
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+      />
+      {children}
+    </>
+  );
 }
