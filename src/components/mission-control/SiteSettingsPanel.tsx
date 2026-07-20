@@ -6,6 +6,14 @@ import { useMutation } from "convex/react";
 import { Settings2 } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import type { SiteSettings } from "@/lib/site-settings";
+import {
+  Button,
+  FeedbackNote,
+  Panel,
+  Skeleton,
+  inputClass,
+  labelClass,
+} from "@/components/ui";
 import { getErrorMessage } from "@/lib/errors";
 
 export default function SiteSettingsPanel({
@@ -15,11 +23,14 @@ export default function SiteSettingsPanel({
 }) {
   if (!settings) {
     return (
-      <section className="border border-gray-200 bg-white p-6 shadow-sm" aria-label="Loading site settings">
+      <section
+        className="rounded-sm border border-line bg-paper p-6 shadow-sm"
+        aria-label="Loading site settings"
+      >
         <div className="animate-pulse space-y-4">
-          <div className="h-4 w-40 bg-gray-100" />
-          <div className="h-10 bg-gray-100" />
-          <div className="h-24 bg-gray-100" />
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-10" />
+          <Skeleton className="h-24" />
         </div>
       </section>
     );
@@ -64,14 +75,7 @@ function SiteSettingsForm({
   };
 
   return (
-    <section className="border border-gray-200 bg-white p-6 shadow-sm">
-      <div className="mb-6 flex items-center gap-2 border-b border-gray-100 pb-2">
-        <Settings2 size={18} className="text-gray-400" />
-        <h2 className="font-mono text-xs font-bold uppercase tracking-widest">
-          Site Settings
-        </h2>
-      </div>
-
+    <Panel icon={<Settings2 size={18} className="text-ink-muted" />} title="Site Settings">
       <form onSubmit={handleSubmit} className="space-y-5">
         <SettingsField
           id="site-name"
@@ -99,10 +103,8 @@ function SiteSettingsForm({
           onChange={(value) => setField("seoDescription", value)}
         />
 
-        <fieldset className="space-y-3 border-t border-gray-100 pt-5">
-          <legend className="font-mono text-[10px] uppercase tracking-widest text-gray-400">
-            Navigation
-          </legend>
+        <fieldset className="space-y-3 border-t border-line pt-5">
+          <legend className={labelClass}>Navigation</legend>
           <NavigationField
             id="nav-about"
             label="About"
@@ -142,26 +144,14 @@ function SiteSettingsForm({
           onChange={(value) => setField("footerText", value)}
         />
 
-        {error && (
-          <p role="alert" className="border border-red-200 bg-red-50 p-3 text-xs text-red-700">
-            {error}
-          </p>
-        )}
-        {message && (
-          <p role="status" className="border border-green-200 bg-green-50 p-3 text-xs text-green-700">
-            {message}
-          </p>
-        )}
+        {error && <FeedbackNote tone="error">{error}</FeedbackNote>}
+        {message && <FeedbackNote tone="success">{message}</FeedbackNote>}
 
-        <button
-          type="submit"
-          disabled={isSaving}
-          className="w-full bg-black py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-gray-800 disabled:bg-gray-400"
-        >
+        <Button type="submit" disabled={isSaving} className="w-full">
           {isSaving ? "Saving Settings..." : "Save Site Settings"}
-        </button>
+        </Button>
       </form>
-    </section>
+    </Panel>
   );
 }
 
@@ -193,17 +183,16 @@ function SettingsField({
     onChange: (
       event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => onChange(event.target.value),
-    className:
-      "w-full border border-gray-200 p-2 text-sm outline-none transition-colors focus:border-black disabled:bg-gray-50",
+    className: inputClass,
   };
 
   return (
     <div className="space-y-1">
       <div className="flex justify-between gap-4">
-        <label htmlFor={id} className="font-mono text-[10px] uppercase tracking-widest text-gray-500">
+        <label htmlFor={id} className={labelClass}>
           {label}
         </label>
-        <span className="font-mono text-[9px] text-gray-300">
+        <span className="font-mono text-xs text-ink-faint">
           {value.length}/{maxLength}
         </span>
       </div>
@@ -243,7 +232,9 @@ function NavigationField({
         disabled={disabled}
         onChange={onValueChange}
       />
-      <label className="flex h-10 items-center gap-2 border border-gray-200 px-3 font-mono text-[10px] uppercase tracking-widest text-gray-500">
+      <label
+        className={`flex h-10 items-center gap-2 border border-line px-3 ${labelClass}`}
+      >
         <input
           type="checkbox"
           checked={visible}

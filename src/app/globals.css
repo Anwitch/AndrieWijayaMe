@@ -1,39 +1,60 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/*
+ * Design tokens — single source of truth (docs/DESIGN_SYSTEM.md).
+ * Every color in the app must come from these tokens; raw gray/blue
+ * utilities are not allowed in components.
+ */
 @theme {
-  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", "Courier New", monospace;
-
-  --color-accent: #000000;
-  --color-accent-light: #5ba3c9;
-  --color-accent-subtle: #d6eaf5;
+  /* Surfaces */
+  --color-paper: #ffffff;
   --color-surface: #f5f5f5;
+
+  /* Ink — text */
+  --color-ink: #000000;
+  --color-ink-secondary: #333333;
+  --color-ink-muted: #666666;
+  --color-ink-faint: #a3a3a3;
+
+  /* Lines — borders */
+  --color-line: #e5e5e5;
+  --color-line-strong: #cccccc;
+
+  /* Accent — eyebrows, inline links, hovered titles. Use sparingly. */
+  --color-accent: #1d6fa4;
+  --color-accent-subtle: #d6eaf5;
+
+  /* Feedback */
+  --color-danger: #b91c1c;
+  --color-danger-bg: #fef2f2;
+  --color-danger-line: #fecaca;
+  --color-success: #15803d;
+  --color-success-bg: #f0fdf4;
+  --color-success-line: #bbf7d0;
+  --color-warning: #ca8a04;
+  --color-warning-bg: #fefce8;
 }
 
-:root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f5f5;
-  --bg-surface: #f5f5f5;
-  --text-primary: #000000;
-  --text-secondary: #333333;
-  --text-muted: #666666;
-  --accent-primary: #000000;
-  --accent-light: #5ba3c9;
-  --accent-subtle: #d6eaf5;
-  --border-default: #e5e5e5;
-  --border-strong: #cccccc;
-}
-
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
 }
 
 @layer utilities {
   .animate-fade-in-up {
     animation: fadeInUp 0.4s ease-out forwards;
+  }
+  .animate-delay-1 {
+    animation-delay: 80ms;
+  }
+  .animate-delay-2 {
+    animation-delay: 160ms;
+  }
+  .animate-delay-3 {
+    animation-delay: 240ms;
   }
 }
 
@@ -48,13 +69,14 @@ body {
   }
 }
 
-/* Staggered animation delays */
-.animate-delay-1 {
-  animation-delay: 80ms;
-}
-.animate-delay-2 {
-  animation-delay: 160ms;
-}
-.animate-delay-3 {
-  animation-delay: 240ms;
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-pulse {
+    animation: none;
+  }
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0.01ms !important;
+  }
 }

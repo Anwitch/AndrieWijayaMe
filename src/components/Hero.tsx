@@ -18,13 +18,13 @@ export default function Hero({
   const updateProfile = useMutation(api.profile.update);
 
   const defaultTagline =
-    "Software Developer dan Tech Enthusiast yang berbasis di Pontianak, Kalimantan Barat.";
+    "Problem solver dan product thinker yang berbasis di Pontianak, Kalimantan Barat.";
 
   return (
     <section className="flex flex-col md:flex-row items-center md:items-start gap-12 py-16 animate-fade-in-up">
       {/* Foto Profil Lingkaran */}
       <div className="flex-shrink-0">
-        <div className="w-48 h-48 md:w-64 md:h-64 overflow-hidden rounded-full border-4 border-gray-100 shadow-sm">
+        <div className="w-48 h-48 md:w-64 md:h-64 overflow-hidden rounded-full border-4 border-line shadow-sm">
           <Image
             src={profile?.avatarUrl ?? "/FotoAndrieGantengKacamata.webp"}
             alt={profile?.avatarAltText ?? settings.siteName}
@@ -39,7 +39,7 @@ export default function Hero({
       {/* Nama dan Social Icons */}
       <div className="flex flex-col justify-center pt-4 w-full">
         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-          <h1 className="text-5xl md:text-6xl font-bold text-black tracking-tight">
+          <h1 className="text-5xl md:text-6xl font-bold text-ink tracking-tight">
             {settings.siteName}
           </h1>
           {/* Ikon Media Sosial */}
@@ -50,7 +50,7 @@ export default function Hero({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`${settings.siteName} on X`}
-                className="bg-black text-white p-2 rounded-full w-10 h-10 flex items-center justify-center text-xs font-bold hover:bg-gray-800 transition-colors"
+                className="bg-ink text-paper p-2 rounded-full w-10 h-10 flex items-center justify-center text-xs font-semibold hover:bg-ink-secondary transition-colors"
               >
                 X
               </a>
@@ -61,14 +61,14 @@ export default function Hero({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`${settings.siteName} on Instagram`}
-                className="bg-black text-white p-2 rounded-full w-10 h-10 flex items-center justify-center text-xs font-bold hover:bg-gray-800 transition-colors"
+                className="bg-ink text-paper p-2 rounded-full w-10 h-10 flex items-center justify-center text-xs font-semibold hover:bg-ink-secondary transition-colors"
               >
                 IG
               </a>
             )}
           </div>
         </div>
-        <div className="text-xl md:text-2xl text-gray-600 mt-6 leading-relaxed max-w-2xl">
+        <div className="text-lg text-ink-secondary mt-6 leading-relaxed max-w-2xl">
           {isPublic ? (
             (profile?.tagline ?? defaultTagline)
           ) : (

@@ -15,6 +15,14 @@ import {
 } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
+import {
+  Button,
+  EmptyState,
+  Eyebrow,
+  FeedbackNote,
+  Panel,
+  Skeleton,
+} from "@/components/ui";
 import { getErrorMessage } from "@/lib/errors";
 
 interface ProjectManagerProps {
@@ -30,6 +38,9 @@ const emptyProjectForm = {
   tags: "",
   link: "",
 };
+
+const editInputClass =
+  "w-full bg-paper border border-line-strong p-1 text-sm outline-none transition-colors focus:border-ink";
 
 export default function ProjectManager({
   projects,
@@ -116,43 +127,31 @@ export default function ProjectManager({
   };
 
   return (
-    <section className="bg-white border border-gray-200 p-8 rounded-sm shadow-sm">
-      <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
-        <div className="flex items-center gap-3">
-          <Settings size={20} className="text-gray-400" />
-          <h2 className="text-2xl font-bold uppercase tracking-tight">
-            Active Projects
-          </h2>
-        </div>
-        <span className="font-mono text-xs text-gray-400 uppercase tracking-widest">
-          {projects?.length ?? 0} Loaded Missions
-        </span>
-      </div>
-
+    <Panel
+      size="lg"
+      icon={<Settings size={20} className="text-ink-muted" />}
+      title="Active Projects"
+      aside={<Eyebrow>{projects?.length ?? 0} Loaded Missions</Eyebrow>}
+    >
       {error && (
-        <p
-          role="alert"
-          className="mb-6 border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-        >
+        <FeedbackNote tone="error" className="mb-6">
           {error}
-        </p>
+        </FeedbackNote>
       )}
 
       {projects === undefined ? (
         <div className="animate-pulse space-y-4" aria-label="Loading projects">
           {[1, 2, 3].map((item) => (
-            <div key={item} className="h-24 bg-gray-50" />
+            <Skeleton key={item} className="h-24" />
           ))}
         </div>
       ) : projects.length === 0 ? (
-        <div className="text-center py-20 border-2 border-dashed border-gray-100 text-gray-400 font-mono text-xs uppercase tracking-widest">
-          No projects found in database.
-        </div>
+        <EmptyState>No projects found in database.</EmptyState>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-gray-100 font-mono text-[10px] uppercase tracking-widest text-gray-400">
+              <tr className="border-b border-line font-mono text-xs uppercase tracking-widest text-ink-muted">
                 <th className="pb-4 font-normal w-24">Year</th>
                 <th className="pb-4 font-normal">Mission Details</th>
                 <th className="pb-4 font-normal w-32">Tags</th>
@@ -169,7 +168,7 @@ export default function ProjectManager({
                 return (
                   <tr
                     key={project._id}
-                    className={`group border-b border-gray-50 transition-colors ${isEditing ? "bg-blue-50/50" : "hover:bg-gray-50"}`}
+                    className={`group border-b border-line transition-colors ${isEditing ? "bg-accent-subtle/40" : "hover:bg-surface"}`}
                   >
                     {isEditing ? (
                       <>
@@ -184,7 +183,7 @@ export default function ProjectManager({
                                 year: event.target.value,
                               })
                             }
-                            className="w-full bg-white border border-gray-300 p-1 text-sm font-mono"
+                            className={`${editInputClass} font-mono`}
                           />
                         </td>
                         <td className="py-4 space-y-2">
@@ -199,7 +198,7 @@ export default function ProjectManager({
                                 title: event.target.value,
                               })
                             }
-                            className="w-full bg-white border border-gray-300 p-1 font-bold"
+                            className={`${editInputClass} font-semibold`}
                             placeholder="Title"
                           />
                           <textarea
@@ -213,7 +212,7 @@ export default function ProjectManager({
                                 description: event.target.value,
                               })
                             }
-                            className="w-full bg-white border border-gray-300 p-1 text-xs min-h-[60px]"
+                            className={`${editInputClass} text-xs min-h-[60px]`}
                             placeholder="Description"
                           />
                           <input
@@ -227,7 +226,7 @@ export default function ProjectManager({
                                 link: event.target.value,
                               })
                             }
-                            className="w-full bg-white border border-gray-300 p-1 text-[10px] font-mono"
+                            className={`${editInputClass} text-xs font-mono`}
                             placeholder="https://example.com"
                           />
                         </td>
@@ -242,7 +241,7 @@ export default function ProjectManager({
                                 tags: event.target.value,
                               })
                             }
-                            className="w-full bg-white border border-gray-300 p-1 text-[10px] font-mono uppercase"
+                            className={`${editInputClass} text-xs font-mono uppercase`}
                           />
                         </td>
                         <td className="py-4 text-right align-top">
@@ -251,7 +250,7 @@ export default function ProjectManager({
                               type="button"
                               onClick={saveEdit}
                               disabled={pendingAction !== null}
-                              className="p-1.5 bg-black text-white hover:bg-gray-800 disabled:bg-gray-400 rounded-sm"
+                              className="p-1.5 bg-ink text-paper hover:bg-ink-secondary disabled:bg-ink-faint rounded-sm"
                               title="Save project"
                             >
                               <Check size={14} />
@@ -260,7 +259,7 @@ export default function ProjectManager({
                               type="button"
                               onClick={() => setEditingProjectId(null)}
                               disabled={pendingAction !== null}
-                              className="p-1.5 border border-gray-300 bg-white hover:bg-gray-50 disabled:text-gray-300 rounded-sm"
+                              className="p-1.5 border border-line-strong bg-paper hover:bg-surface disabled:text-ink-faint rounded-sm"
                               title="Cancel editing"
                             >
                               <X size={14} />
@@ -286,7 +285,7 @@ export default function ProjectManager({
                                 )
                               }
                               disabled={pendingAction !== null}
-                              className={`p-1.5 rounded-full transition-all disabled:opacity-40 ${isPublished ? "text-green-600 bg-green-50" : "text-gray-300 hover:text-green-500"}`}
+                              className={`p-1.5 rounded-full transition-all disabled:opacity-40 ${isPublished ? "text-success bg-success-bg" : "text-ink-faint hover:text-success"}`}
                               title={isPublished ? "Unpublish project" : "Publish project"}
                             >
                               {isPublished ? <Eye size={16} /> : <EyeOff size={16} />}
@@ -302,7 +301,7 @@ export default function ProjectManager({
                                 )
                               }
                               disabled={pendingAction !== null}
-                              className={`p-1.5 rounded-full transition-all disabled:opacity-40 ${project.isFeatured ? "text-yellow-500 bg-yellow-50 shadow-sm" : "text-gray-300 hover:text-yellow-400"}`}
+                              className={`p-1.5 rounded-full transition-all disabled:opacity-40 ${project.isFeatured ? "text-warning bg-warning-bg shadow-sm" : "text-ink-faint hover:text-warning"}`}
                               title={
                                 project.isFeatured
                                   ? "Remove from featured projects"
@@ -317,14 +316,14 @@ export default function ProjectManager({
                               />
                             </button>
                             <div>
-                              <div className="font-bold text-lg">
+                              <div className="font-semibold text-lg">
                                 {project.title}
                               </div>
-                              <div className="text-xs text-gray-500 line-clamp-1 max-w-md">
+                              <div className="text-xs text-ink-muted line-clamp-1 max-w-md">
                                 {project.description}
                               </div>
                               {project.link && (
-                                <div className="text-[10px] text-gray-400 font-mono mt-1">
+                                <div className="text-xs text-ink-faint font-mono mt-1">
                                   {project.link}
                                 </div>
                               )}
@@ -332,7 +331,7 @@ export default function ProjectManager({
                           </div>
                         </td>
                         <td className="py-4 align-top">
-                          <span className="font-mono text-[10px] bg-gray-100 px-2 py-1 rounded-full uppercase tracking-widest inline-block">
+                          <span className="font-mono text-xs bg-surface px-2 py-1 rounded-full uppercase tracking-widest inline-block">
                             {project.tags}
                           </span>
                         </td>
@@ -342,7 +341,7 @@ export default function ProjectManager({
                               type="button"
                               onClick={() => startEditing(project)}
                               disabled={pendingAction !== null}
-                              className="p-2 text-gray-400 hover:text-black hover:bg-white rounded-sm shadow-sm border border-transparent hover:border-gray-200 transition-all"
+                              className="p-2 text-ink-muted hover:text-ink hover:bg-paper rounded-sm shadow-sm border border-transparent hover:border-line transition-all"
                               title="Edit project"
                             >
                               <Edit2 size={16} />
@@ -352,7 +351,7 @@ export default function ProjectManager({
                                 href={project.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-2 text-gray-400 hover:text-black hover:bg-white rounded-sm shadow-sm border border-transparent hover:border-gray-200 transition-all"
+                                className="p-2 text-ink-muted hover:text-ink hover:bg-paper rounded-sm shadow-sm border border-transparent hover:border-line transition-all"
                                 title="Open project"
                               >
                                 <ExternalLink size={16} />
@@ -362,7 +361,7 @@ export default function ProjectManager({
                               type="button"
                               onClick={() => deleteProject(project)}
                               disabled={pendingAction !== null || isDeleting}
-                              className="p-2 text-red-300 hover:text-red-600 hover:bg-white disabled:opacity-40 rounded-sm shadow-sm border border-transparent hover:border-red-100 transition-all"
+                              className="p-2 text-danger/50 hover:text-danger hover:bg-paper disabled:opacity-40 rounded-sm shadow-sm border border-transparent hover:border-danger-line transition-all"
                               title="Delete project"
                             >
                               <Trash2 size={16} />
@@ -379,15 +378,16 @@ export default function ProjectManager({
         </div>
       )}
       {status !== "Exhausted" && projects !== undefined && (
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={onLoadMore}
           disabled={status === "LoadingMore"}
-          className="mt-8 w-full border border-gray-200 py-3 font-mono text-xs uppercase tracking-widest text-gray-500 hover:border-black hover:text-black disabled:text-gray-300"
+          className="mt-8 w-full"
         >
           {status === "LoadingMore" ? "Loading Missions..." : "Load More Missions"}
-        </button>
+        </Button>
       )}
-    </section>
+    </Panel>
   );
 }

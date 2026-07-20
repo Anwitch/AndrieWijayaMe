@@ -13,6 +13,7 @@ import ProfilePanel from "@/components/mission-control/ProfilePanel";
 import ProjectManager from "@/components/mission-control/ProjectManager";
 import SiteSettingsPanel from "@/components/mission-control/SiteSettingsPanel";
 import MediaManager from "@/components/mission-control/MediaManager";
+import { Button, Eyebrow, Panel } from "@/components/ui";
 
 export default function MissionControl() {
   const isAdmin = useQuery(api.admin.isCurrentUserAdmin);
@@ -51,17 +52,17 @@ function MissionControlContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-black">
-      <header className="bg-black text-white py-6 px-8 flex justify-between items-center shadow-lg">
+    <div className="min-h-screen bg-surface font-sans text-ink">
+      <header className="bg-ink text-paper py-6 px-8 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="bg-white text-black p-2 rounded-sm font-mono text-xs font-bold">
+          <div className="bg-paper text-ink p-2 rounded-sm font-mono text-xs font-semibold">
             AND-WITCH
           </div>
           <div>
-            <h1 className="text-xl font-bold uppercase tracking-widest">
+            <h1 className="text-xl font-semibold uppercase tracking-widest">
               Mission Control
             </h1>
-            <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">
+            <p className="font-mono text-xs text-ink-faint uppercase tracking-widest">
               Command &amp; Control Center // Internal Use Only
             </p>
           </div>
@@ -69,14 +70,14 @@ function MissionControlContent() {
         <div className="flex items-center gap-6">
           <Link
             href="/"
-            className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest hover:text-gray-300 transition-colors"
+            className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:text-ink-faint transition-colors"
           >
             <ArrowLeft size={14} /> Back to Public Site
           </Link>
           <button
             type="button"
             onClick={() => void handleSignOut()}
-            className="font-mono text-[10px] uppercase tracking-widest text-gray-400 hover:text-white"
+            className="font-mono text-xs uppercase tracking-widest text-ink-faint hover:text-paper"
           >
             Sign Out
           </button>
@@ -87,24 +88,18 @@ function MissionControlContent() {
         <aside className="space-y-8">
           <ProfilePanel profile={profile} />
           <SiteSettingsPanel settings={siteSettings} />
-          <section className="bg-white border border-gray-200 p-6 rounded-sm shadow-sm">
-            <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-2">
-              <Layout size={18} className="text-gray-400" />
-              <h2 className="font-mono text-xs uppercase tracking-widest font-bold">
-                New Mission
-              </h2>
-            </div>
+          <Panel
+            icon={<Layout size={18} className="text-ink-muted" />}
+            title="New Mission"
+          >
             <AddProjectForm />
-          </section>
-          <section className="bg-white border border-gray-200 p-6 rounded-sm shadow-sm">
-            <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-2">
-              <PenLine size={18} className="text-gray-400" />
-              <h2 className="font-mono text-xs uppercase tracking-widest font-bold">
-                New Log
-              </h2>
-            </div>
+          </Panel>
+          <Panel
+            icon={<PenLine size={18} className="text-ink-muted" />}
+            title="New Log"
+          >
             <AddPostForm />
-          </section>
+          </Panel>
         </aside>
 
         <div className="space-y-12">
@@ -129,10 +124,8 @@ function MissionControlContent() {
 
 function MissionControlLoading() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-6 text-black">
-      <div className="font-mono text-xs uppercase tracking-widest text-gray-400">
-        Verifying clearance...
-      </div>
+    <main className="flex min-h-screen items-center justify-center bg-surface px-6 text-ink">
+      <Eyebrow>Verifying clearance...</Eyebrow>
     </main>
   );
 }
@@ -148,23 +141,23 @@ function UnauthorizedMissionControl() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-100 px-6 text-black">
-      <section className="w-full max-w-md border border-red-200 bg-white p-8 text-center shadow-sm">
-        <div className="font-mono text-xs uppercase tracking-widest text-red-600">
+    <main className="flex min-h-screen items-center justify-center bg-surface px-6 text-ink">
+      <section className="w-full max-w-md rounded-sm border border-danger-line bg-paper p-8 text-center shadow-sm">
+        <Eyebrow as="div" className="text-danger">
           Clearance denied
-        </div>
-        <h1 className="mt-4 text-2xl font-bold">Unauthorized Account</h1>
-        <p className="mt-3 text-sm leading-relaxed text-gray-500">
+        </Eyebrow>
+        <h1 className="mt-4 text-2xl font-semibold">Unauthorized Account</h1>
+        <p className="mt-3 text-sm leading-relaxed text-ink-muted">
           This authenticated account is not configured as the Mission Control
           administrator.
         </p>
-        <button
+        <Button
           type="button"
           onClick={() => void handleSignOut()}
-          className="mt-8 w-full bg-black px-4 py-3 font-mono text-xs uppercase tracking-widest text-white hover:bg-gray-800"
+          className="mt-8 w-full"
         >
           Sign Out
-        </button>
+        </Button>
       </section>
     </main>
   );

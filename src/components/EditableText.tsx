@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Edit2, Check, X, Bold, Italic, List, ListOrdered } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { FeedbackNote, labelClass } from "@/components/ui";
 import { getErrorMessage } from "@/lib/errors";
 
 interface EditableTextProps {
@@ -84,21 +85,18 @@ export default function EditableText({
     return (
       <div className="flex flex-col gap-2 w-full animate-fade-in-up">
         <div className="flex justify-between items-center">
-          <label
-            htmlFor={inputId}
-            className="font-mono text-[10px] uppercase tracking-widest text-gray-400"
-          >
+          <label htmlFor={inputId} className={labelClass}>
             {label}
           </label>
 
           {/* Toolbar */}
           {multiline && (
-            <div className="flex gap-1 border border-gray-200 p-1 bg-gray-50">
+            <div className="flex gap-1 border border-line p-1 bg-surface">
               <button
                 type="button"
                 disabled={isSaving}
                 onClick={() => insertText("**", "**")}
-                className="p-1 hover:bg-white transition-colors"
+                className="p-1 hover:bg-paper transition-colors"
                 title="Bold"
               >
                 <Bold size={14} />
@@ -107,7 +105,7 @@ export default function EditableText({
                 type="button"
                 disabled={isSaving}
                 onClick={() => insertText("*", "*")}
-                className="p-1 hover:bg-white transition-colors"
+                className="p-1 hover:bg-paper transition-colors"
                 title="Italic"
               >
                 <Italic size={14} />
@@ -116,7 +114,7 @@ export default function EditableText({
                 type="button"
                 disabled={isSaving}
                 onClick={() => insertText("\n- ")}
-                className="p-1 hover:bg-white transition-colors"
+                className="p-1 hover:bg-paper transition-colors"
                 title="Bullet List"
               >
                 <List size={14} />
@@ -125,7 +123,7 @@ export default function EditableText({
                 type="button"
                 disabled={isSaving}
                 onClick={() => insertText("\n1. ")}
-                className="p-1 hover:bg-white transition-colors"
+                className="p-1 hover:bg-paper transition-colors"
                 title="Numbered List"
               >
                 <ListOrdered size={14} />
@@ -141,7 +139,7 @@ export default function EditableText({
             disabled={isSaving}
             value={currentValue}
             onChange={(e) => setCurrentValue(e.target.value)}
-            className="w-full border border-black p-3 text-lg leading-relaxed outline-none min-h-[200px] font-sans"
+            className="w-full border border-ink p-3 text-lg leading-relaxed outline-none min-h-[200px] font-sans"
             autoFocus
           />
         ) : (
@@ -151,18 +149,15 @@ export default function EditableText({
             disabled={isSaving}
             value={currentValue}
             onChange={(e) => setCurrentValue(e.target.value)}
-            className="w-full border-b border-black py-1 text-xl font-semibold outline-none font-sans"
+            className="w-full border-b border-ink py-1 text-xl font-semibold outline-none font-sans"
             autoFocus
           />
         )}
 
         {error && (
-          <p
-            role="alert"
-            className="border border-red-200 bg-red-50 p-2 text-xs not-italic text-red-700"
-          >
+          <FeedbackNote tone="error" className="not-italic">
             {error}
-          </p>
+          </FeedbackNote>
         )}
 
         <div className="flex gap-2 justify-end">
@@ -170,7 +165,7 @@ export default function EditableText({
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="p-2 bg-black text-white hover:bg-gray-800 disabled:bg-gray-400 transition-colors flex items-center gap-2 text-sm font-mono uppercase tracking-widest"
+            className="p-2 bg-ink text-paper hover:bg-ink-secondary disabled:bg-ink-faint transition-colors flex items-center gap-2 font-mono text-xs uppercase tracking-widest"
           >
             <Check size={16} /> {isSaving ? "Saving..." : "Save"}
           </button>
@@ -178,7 +173,7 @@ export default function EditableText({
             type="button"
             onClick={handleCancel}
             disabled={isSaving}
-            className="p-2 border border-black hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-mono uppercase tracking-widest"
+            className="p-2 border border-ink hover:bg-surface transition-colors flex items-center gap-2 font-mono text-xs uppercase tracking-widest"
           >
             <X size={16} /> Cancel
           </button>
@@ -189,14 +184,14 @@ export default function EditableText({
 
   return (
     <div className="group relative">
-      <div className="prose prose-slate max-w-none pr-20 prose-p:leading-relaxed prose-p:text-gray-800 prose-strong:text-black prose-p:mb-4">
+      <div className="prose max-w-none pr-20 prose-p:leading-relaxed prose-p:text-ink-secondary prose-strong:text-ink prose-p:mb-4">
         {value ? (
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>
         ) : (
           <button
             type="button"
             onClick={startEditing}
-            className="text-left text-gray-400 italic hover:text-black transition-colors"
+            className="text-left text-ink-faint italic hover:text-ink transition-colors"
           >
             No content set for {label}. Click to edit.
           </button>
@@ -205,7 +200,7 @@ export default function EditableText({
       <button
         type="button"
         onClick={startEditing}
-        className="absolute right-0 top-0 flex items-center gap-1 p-2 bg-white shadow-sm border border-gray-200 text-gray-500 hover:border-black hover:text-black transition-colors font-mono text-[10px] uppercase tracking-widest"
+        className="absolute right-0 top-0 flex items-center gap-1 p-2 bg-paper shadow-sm border border-line text-ink-muted hover:border-ink hover:text-ink transition-colors font-mono text-xs uppercase tracking-widest"
         title={`Edit ${label}`}
       >
         <Edit2 size={14} />

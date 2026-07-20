@@ -2,9 +2,15 @@
 
 import { useEffect } from "react";
 import PublicShell from "@/components/PublicShell";
+import {
+  Button,
+  Eyebrow,
+  MonoLink,
+  PageHeader,
+  Skeleton,
+} from "@/components/ui";
 import { usePaginatedQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 
 export default function ProjectsArchive() {
@@ -24,31 +30,21 @@ export default function ProjectsArchive() {
 
   return (
     <PublicShell>
-      <main className="max-w-6xl mx-auto px-6 py-16 min-h-screen">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-gray-400 hover:text-black transition-colors mb-12"
-        >
+      <main className="max-w-6xl mx-auto px-6 py-16 md:py-24 min-h-screen animate-fade-in-up">
+        <MonoLink href="/" className="mb-12">
           <ArrowLeft size={14} /> Back to Profile
-        </Link>
+        </MonoLink>
 
-        <header className="mb-20">
-          <span className="font-mono text-xs uppercase tracking-widest text-[var(--accent-primary)] block mb-4">
-            Archive
-          </span>
-          <h1 className="text-5xl font-bold tracking-tight mb-6 text-[var(--text-primary)]">
-            All Missions
-          </h1>
-          <p className="text-[var(--text-secondary)] text-xl max-w-2xl leading-relaxed">
-            A comprehensive log of all projects, experiments, and digital
-            builds. Structured for archival reference.
-          </p>
-        </header>
+        <PageHeader
+          eyebrow="Archive"
+          title="All Missions"
+          lede="A comprehensive log of all projects, experiments, and digital builds. Structured for archival reference."
+        />
 
-        <div className="border-t border-[var(--border-default)]">
+        <div className="border-t border-line">
           <table className="w-full text-left border-collapse table-fixed">
             <thead>
-              <tr className="border-b border-[var(--border-default)] font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+              <tr className="border-b border-line font-mono text-xs uppercase tracking-widest text-ink-muted">
                 {/* Memberikan padding kiri (pl-6) pada kolom pertama */}
                 <th className="py-6 pl-6 pr-8 font-normal w-[15%]">Year</th>
                 <th className="py-6 font-normal w-[45%] md:w-[50%]">
@@ -63,65 +59,59 @@ export default function ProjectsArchive() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--bg-secondary)]">
+            <tbody className="divide-y divide-line">
               {isLoading ? (
                 [1, 2, 3, 4, 5, 6].map((i) => (
                   <tr key={i} className="animate-pulse">
                     <td className="py-8 pl-6 pr-8">
-                      <div className="h-4 bg-gray-100 w-12" />
+                      <Skeleton className="h-4 w-12" />
                     </td>
                     <td className="py-8">
-                      <div className="h-5 bg-gray-100 w-48 mb-3" />
-                      <div className="h-4 bg-gray-100 w-full max-w-md" />
+                      <Skeleton className="h-5 w-48 mb-3" />
+                      <Skeleton className="h-4 w-full max-w-md" />
                     </td>
                     <td className="py-8 px-8 hidden md:table-cell">
-                      <div className="h-4 bg-gray-100 w-24" />
+                      <Skeleton className="h-4 w-24" />
                     </td>
                     <td className="py-8 pl-8 pr-6 text-right">
-                      <div className="h-4 bg-gray-100 w-8 ml-auto" />
+                      <Skeleton className="h-4 w-8 ml-auto" />
                     </td>
                   </tr>
                 ))
               ) : projects.length === 0 && status === "Exhausted" ? (
                 <tr>
-                  <td
-                    colSpan={4}
-                    className="py-20 text-center font-mono text-xs text-gray-400 uppercase tracking-widest"
-                  >
-                    No missions found in the logs.
+                  <td colSpan={4}>
+                    <EmptyRow>No missions found in the logs.</EmptyRow>
                   </td>
                 </tr>
               ) : projects.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={4}
-                    className="py-20 text-center font-mono text-xs text-gray-400 uppercase tracking-widest"
-                  >
-                    Scanning mission logs...
+                  <td colSpan={4}>
+                    <EmptyRow>Scanning mission logs...</EmptyRow>
                   </td>
                 </tr>
               ) : (
                 projects.map((project) => (
                   <tr
                     key={project._id}
-                    className="group hover:bg-[var(--bg-secondary)]/50 transition-colors"
+                    className="group hover:bg-surface/50 transition-colors"
                   >
                     {/* Padding kiri yang sama dengan header */}
-                    <td className="py-8 pl-6 pr-8 align-top font-mono text-sm text-[var(--text-muted)] whitespace-nowrap">
+                    <td className="py-8 pl-6 pr-8 align-top font-mono text-sm text-ink-muted whitespace-nowrap">
                       {project.year}
                     </td>
                     <td className="py-8 align-top">
-                      <div className="font-semibold text-lg text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] transition-colors leading-none">
+                      <div className="font-semibold text-lg text-ink group-hover:text-accent transition-colors leading-none">
                         {project.title}
                       </div>
-                      <div className="text-base text-[var(--text-secondary)] mt-4 max-w-xl leading-relaxed">
+                      <div className="text-base text-ink-secondary mt-4 max-w-xl leading-relaxed">
                         {project.description}
                       </div>
                     </td>
                     <td className="py-8 px-8 align-top hidden md:table-cell">
-                      <span className="font-mono text-[10px] text-[var(--text-muted)] uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis block">
+                      <Eyebrow className="whitespace-nowrap overflow-hidden text-ellipsis block">
                         {project.tags}
-                      </span>
+                      </Eyebrow>
                     </td>
                     {/* Padding kanan yang sama dengan header */}
                     <td className="py-8 pl-8 pr-6 align-top text-right">
@@ -130,15 +120,15 @@ export default function ProjectsArchive() {
                           href={project.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-colors"
+                          className="inline-flex items-center gap-2 text-ink-muted hover:text-accent transition-colors"
                         >
-                          <span className="text-[10px] font-mono uppercase tracking-widest hidden sm:inline">
+                          <span className="text-xs font-mono uppercase tracking-widest hidden sm:inline">
                             View
                           </span>
                           <ExternalLink size={14} />
                         </a>
                       ) : (
-                        <span className="text-[var(--border-strong)]">—</span>
+                        <span className="text-ink-faint">—</span>
                       )}
                     </td>
                   </tr>
@@ -148,16 +138,25 @@ export default function ProjectsArchive() {
           </table>
         </div>
         {status !== "Exhausted" && (
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => loadMore(50)}
             disabled={status === "LoadingMore"}
-            className="mt-10 w-full border border-[var(--border-default)] py-3 font-mono text-xs uppercase tracking-widest text-[var(--text-muted)] transition-colors hover:border-black hover:text-black disabled:text-gray-300"
+            className="mt-10 w-full"
           >
             {status === "LoadingMore" ? "Loading Missions..." : "Load More Missions"}
-          </button>
+          </Button>
         )}
       </main>
     </PublicShell>
+  );
+}
+
+function EmptyRow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="py-20 text-center">
+      <Eyebrow>{children}</Eyebrow>
+    </div>
   );
 }

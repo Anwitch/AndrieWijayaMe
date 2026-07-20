@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { MonoLink } from "@/components/ui";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 
 export default function Navbar() {
@@ -24,23 +25,19 @@ export default function Navbar() {
   ].filter((item) => item.visible);
 
   return (
-    <nav className="border-b border-gray-100 py-4">
-      <div className="max-w-6xl mx-auto px-6 flex justify-between items-center gap-6">
+    <nav className="border-b border-line py-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6">
         <Link
           href="/"
-          className="min-w-0 truncate font-mono text-xs uppercase tracking-[0.2em] font-bold"
+          className="min-w-0 truncate font-mono text-xs font-semibold uppercase tracking-widest text-ink"
         >
           {settings.siteName}
         </Link>
-        <div className="flex shrink-0 gap-3 sm:gap-8">
+        <div className="flex shrink-0 gap-4 sm:gap-8">
           {links.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-[10px] uppercase tracking-wider font-semibold text-gray-600 hover:text-black transition-colors sm:text-xs sm:tracking-widest"
-            >
+            <MonoLink key={item.href} href={item.href}>
               {item.name}
-            </Link>
+            </MonoLink>
           ))}
         </div>
       </div>

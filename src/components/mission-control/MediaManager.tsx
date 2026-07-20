@@ -14,6 +14,15 @@ import {
 } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import {
+  Button,
+  EmptyState,
+  FeedbackNote,
+  Panel,
+  Skeleton,
+  inputClass,
+  labelClass,
+} from "@/components/ui";
 import { getErrorMessage } from "@/lib/errors";
 
 const MAX_MEDIA_SIZE = 5 * 1024 * 1024;
@@ -136,30 +145,21 @@ export default function MediaManager() {
   };
 
   return (
-    <section
+    <Panel
       id="media-library"
-      className="scroll-mt-8 border border-gray-200 bg-white p-5 shadow-sm sm:p-8"
-    >
-      <div className="mb-8 flex flex-col gap-4 border-b border-gray-100 pb-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <ImageIcon size={20} className="text-gray-400" />
-            <h2 className="text-2xl font-bold uppercase tracking-tight">
-              Media Library
-            </h2>
-          </div>
-          <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-gray-400">
-            Convex Storage // JPEG, PNG, WebP // 5 MB max
-          </p>
-        </div>
-        <label className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-gray-500">
+      size="lg"
+      icon={<ImageIcon size={20} className="text-ink-muted" />}
+      title="Media Library"
+      subtitle="Convex Storage // JPEG, PNG, WebP // 5 MB max"
+      aside={
+        <label className={`flex items-center gap-3 ${labelClass}`}>
           Filter
           <select
             value={filter}
             onChange={(event) =>
               setFilter(event.target.value as Purpose | "all")
             }
-            className="border border-gray-200 bg-white px-3 py-2 text-black outline-none focus:border-black"
+            className={`${inputClass} w-auto text-ink`}
           >
             <option value="all">All purposes</option>
             {PURPOSES.map((item) => (
@@ -169,13 +169,13 @@ export default function MediaManager() {
             ))}
           </select>
         </label>
-      </div>
-
+      }
+    >
       <form
         onSubmit={uploadMedia}
-        className="mb-8 grid gap-5 border border-dashed border-gray-300 bg-gray-50 p-4 sm:p-6 lg:grid-cols-[180px_1fr]"
+        className="mb-8 grid gap-5 border border-dashed border-line-strong bg-surface p-4 sm:p-6 lg:grid-cols-[180px_1fr]"
       >
-        <div className="relative aspect-square overflow-hidden border border-gray-200 bg-white">
+        <div className="relative aspect-square overflow-hidden border border-line bg-paper">
           {previewUrl ? (
             <Image
               src={previewUrl}
@@ -186,9 +186,9 @@ export default function MediaManager() {
               className="object-cover"
             />
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-gray-300">
+            <div className="flex h-full flex-col items-center justify-center gap-3 text-ink-faint">
               <Upload size={28} />
-              <span className="font-mono text-[9px] uppercase tracking-widest">
+              <span className="font-mono text-xs uppercase tracking-widest">
                 Preview
               </span>
             </div>
@@ -196,27 +196,23 @@ export default function MediaManager() {
         </div>
         <div className="grid content-start gap-4 sm:grid-cols-2">
           <label className="space-y-1 sm:col-span-2">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-gray-500">
-              Image file
-            </span>
+            <span className={labelClass}>Image file</span>
             <input
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png,image/webp"
               disabled={isUploading}
               onChange={(event) => chooseFile(event.target.files?.[0])}
-              className="block w-full border border-gray-200 bg-white p-2 text-xs file:mr-3 file:border-0 file:bg-black file:px-3 file:py-2 file:font-mono file:text-[10px] file:uppercase file:tracking-widest file:text-white"
+              className="block w-full rounded-sm border border-line-strong bg-paper p-2 text-xs file:mr-3 file:border-0 file:bg-ink file:px-3 file:py-2 file:font-mono file:text-xs file:uppercase file:tracking-widest file:text-paper"
             />
           </label>
           <label className="space-y-1">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-gray-500">
-              Purpose
-            </span>
+            <span className={labelClass}>Purpose</span>
             <select
               value={purpose}
               disabled={isUploading}
               onChange={(event) => setPurpose(event.target.value as Purpose)}
-              className="w-full border border-gray-200 bg-white p-2 text-sm outline-none focus:border-black"
+              className={inputClass}
             >
               {PURPOSES.map((item) => (
                 <option key={item} value={item}>
@@ -226,54 +222,49 @@ export default function MediaManager() {
             </select>
           </label>
           <label className="space-y-1">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-gray-500">
-              Alt text
-            </span>
+            <span className={labelClass}>Alt text</span>
             <input
               value={altText}
               maxLength={300}
               disabled={isUploading}
               onChange={(event) => setAltText(event.target.value)}
-              className="w-full border border-gray-200 bg-white p-2 text-sm outline-none focus:border-black"
+              className={inputClass}
               placeholder="Describe the image"
             />
           </label>
           <div className="flex items-center justify-between gap-4 sm:col-span-2">
-            <span className="font-mono text-[9px] uppercase tracking-widest text-gray-400">
+            <span className="font-mono text-xs uppercase tracking-widest text-ink-muted">
               {file ? `${file.type} // ${formatBytes(file.size)}` : "No file selected"}
             </span>
-            <button
-              type="submit"
-              disabled={!file || isUploading}
-              className="bg-black px-5 py-3 font-mono text-[10px] uppercase tracking-widest text-white hover:bg-gray-800 disabled:bg-gray-300"
-            >
+            <Button type="submit" disabled={!file || isUploading}>
               {isUploading ? "Uploading..." : "Upload media"}
-            </button>
+            </Button>
           </div>
         </div>
       </form>
 
       {error && (
-        <p role="alert" className="mb-6 border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <FeedbackNote tone="error" className="mb-6">
           {error}
-        </p>
+        </FeedbackNote>
       )}
       {message && (
-        <p role="status" className="mb-6 border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+        <FeedbackNote tone="success" className="mb-6">
           {message}
-        </p>
+        </FeedbackNote>
       )}
 
       {status === "LoadingFirstPage" ? (
-        <div className="grid animate-pulse gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-label="Loading media">
+        <div
+          className="grid animate-pulse gap-4 sm:grid-cols-2 xl:grid-cols-3"
+          aria-label="Loading media"
+        >
           {[1, 2, 3].map((item) => (
-            <div key={item} className="aspect-[4/5] bg-gray-50" />
+            <Skeleton key={item} className="aspect-[4/5]" />
           ))}
         </div>
       ) : results.length === 0 ? (
-        <div className="border-2 border-dashed border-gray-100 py-20 text-center font-mono text-xs uppercase tracking-widest text-gray-400">
-          No media in this channel.
-        </div>
+        <EmptyState>No media in this channel.</EmptyState>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {results.map((media) => (
@@ -304,16 +295,17 @@ export default function MediaManager() {
       )}
 
       {(status === "CanLoadMore" || status === "LoadingMore") && (
-        <button
+        <Button
           type="button"
+          variant="outline"
           disabled={status === "LoadingMore"}
           onClick={() => loadMore(12)}
-          className="mt-8 w-full border border-gray-200 py-3 font-mono text-[10px] uppercase tracking-widest hover:border-black disabled:text-gray-300"
+          className="mt-8 w-full"
         >
           {status === "LoadingMore" ? "Loading..." : "Load more media"}
-        </button>
+        </Button>
       )}
-    </section>
+    </Panel>
   );
 }
 
@@ -337,8 +329,8 @@ function MediaCard({
   const isPending = pendingAction?.endsWith(media._id) ?? false;
 
   return (
-    <article className="overflow-hidden border border-gray-200 bg-white">
-      <div className="relative aspect-square bg-gray-100">
+    <article className="overflow-hidden rounded-sm border border-line bg-paper">
+      <div className="relative aspect-square bg-surface">
         {media.url ? (
           <Image
             src={media.url}
@@ -348,15 +340,15 @@ function MediaCard({
             className="object-cover"
           />
         ) : (
-          <div className="flex h-full items-center justify-center font-mono text-[10px] uppercase tracking-widest text-gray-400">
+          <div className="flex h-full items-center justify-center font-mono text-xs uppercase tracking-widest text-ink-muted">
             File unavailable
           </div>
         )}
-        <span className="absolute left-2 top-2 bg-black/85 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-white">
+        <span className="absolute left-2 top-2 bg-ink/85 px-2 py-1 font-mono text-xs uppercase tracking-widest text-paper">
           {formatPurpose(media.purpose)}
         </span>
         {media.isInUse && (
-          <span className="absolute right-2 top-2 bg-white px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-black shadow-sm">
+          <span className="absolute right-2 top-2 bg-paper px-2 py-1 font-mono text-xs uppercase tracking-widest text-ink shadow-sm">
             In use
           </span>
         )}
@@ -366,7 +358,7 @@ function MediaCard({
           <p className="truncate text-sm font-semibold" title={media.originalName}>
             {media.originalName}
           </p>
-          <p className="mt-1 font-mono text-[9px] uppercase tracking-widest text-gray-400">
+          <p className="mt-1 font-mono text-xs uppercase tracking-widest text-ink-faint">
             {media.contentType.replace("image/", "")} {" // "}
             {formatBytes(media.size)}
           </p>
@@ -381,7 +373,7 @@ function MediaCard({
               onChange={(event) => setAltText(event.target.value)}
               aria-label={`Alt text for ${media.originalName}`}
               rows={3}
-              className="w-full border border-gray-200 p-2 text-xs outline-none focus:border-black"
+              className="w-full rounded-sm border border-line-strong p-2 text-xs outline-none transition-colors focus:border-ink"
             />
             <div className="flex justify-end gap-2">
               <button
@@ -391,7 +383,7 @@ function MediaCard({
                   setAltText(media.altText);
                   setIsEditingAlt(false);
                 }}
-                className="p-2 text-gray-500 hover:text-black"
+                className="p-2 text-ink-muted hover:text-ink"
                 aria-label="Cancel alt text edit"
               >
                 <X size={14} />
@@ -402,7 +394,7 @@ function MediaCard({
                 onClick={() =>
                   void onSaveAlt(altText).then(() => setIsEditingAlt(false))
                 }
-                className="bg-black p-2 text-white disabled:bg-gray-300"
+                className="bg-ink p-2 text-paper disabled:bg-ink-faint"
                 aria-label="Save alt text"
               >
                 <Check size={14} />
@@ -413,7 +405,7 @@ function MediaCard({
           <button
             type="button"
             onClick={() => setIsEditingAlt(true)}
-            className="flex min-h-10 w-full items-start justify-between gap-3 border-l-2 border-gray-100 pl-3 text-left text-xs text-gray-500 hover:border-black hover:text-black"
+            className="flex min-h-10 w-full items-start justify-between gap-3 border-l-2 border-line pl-3 text-left text-xs text-ink-muted hover:border-ink hover:text-ink"
           >
             <span className="line-clamp-2">{media.altText || "No alt text"}</span>
             <Pencil size={12} className="mt-0.5 shrink-0" />
@@ -426,7 +418,7 @@ function MediaCard({
               type="button"
               disabled={isPending || media.isInUse || !media.url}
               onClick={() => void onUseAsAvatar()}
-              className="flex items-center justify-center gap-2 border border-gray-200 px-2 py-2 font-mono text-[9px] uppercase tracking-widest hover:border-black disabled:bg-gray-50 disabled:text-gray-300"
+              className="flex items-center justify-center gap-2 rounded-sm border border-line px-2 py-2 font-mono text-xs uppercase tracking-widest hover:border-ink disabled:bg-surface disabled:text-ink-faint"
             >
               <UserRound size={13} />
               {media.isInUse ? "Active" : "Use avatar"}
@@ -436,7 +428,7 @@ function MediaCard({
             type="button"
             disabled={isPending || media.isInUse}
             onClick={onDelete}
-            className={`${media.purpose === "profile-avatar" ? "" : "col-span-2"} flex items-center justify-center gap-2 border border-red-100 px-2 py-2 font-mono text-[9px] uppercase tracking-widest text-red-600 hover:border-red-500 disabled:bg-gray-50 disabled:text-gray-300`}
+            className={`${media.purpose === "profile-avatar" ? "" : "col-span-2"} flex items-center justify-center gap-2 rounded-sm border border-danger-line px-2 py-2 font-mono text-xs uppercase tracking-widest text-danger hover:border-danger disabled:bg-surface disabled:text-ink-faint`}
             title={media.isInUse ? "Detach this media before deleting it" : undefined}
           >
             <Trash2 size={13} /> Delete

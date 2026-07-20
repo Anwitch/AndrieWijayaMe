@@ -1,6 +1,7 @@
 "use client";
 
 import EditableText from "./EditableText";
+import { Eyebrow } from "@/components/ui";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "../../convex/_generated/api";
@@ -38,13 +39,11 @@ export default function MetadataStrip({
   ];
 
   return (
-    <div className="flex flex-wrap gap-x-8 gap-y-4 border-y border-gray-200 py-6 my-8 animate-fade-in-up">
+    <div className="flex flex-wrap gap-x-8 gap-y-4 border-y border-line py-6 my-8 animate-fade-in-up">
       {metadata.map((item) => (
         <div key={item.label} className="flex flex-col gap-1">
-          <span className="font-mono text-xs uppercase tracking-widest text-gray-400">
-            {item.label}
-          </span>
-          <span className="text-sm font-medium text-black">
+          <Eyebrow>{item.label}</Eyebrow>
+          <span className="text-sm font-medium text-ink">
             {isPublic ? (
               item.value
             ) : (

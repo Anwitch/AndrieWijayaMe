@@ -4,6 +4,12 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Plus, X } from "lucide-react";
+import {
+  Button,
+  FeedbackNote,
+  inputUnderlineClass,
+  labelClass,
+} from "@/components/ui";
 import { getErrorMessage } from "@/lib/errors";
 
 export default function AddProjectForm() {
@@ -60,19 +66,16 @@ export default function AddProjectForm() {
 
   if (!isOpen) {
     return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-mono uppercase tracking-widest hover:bg-gray-800 transition-colors rounded-sm"
-      >
+      <Button type="button" onClick={() => setIsOpen(true)} className="py-2">
         <Plus size={14} /> Add Project
-      </button>
+      </Button>
     );
   }
 
   return (
-    <div className="border border-black p-6 bg-white animate-fade-in-up">
+    <div className="border border-ink p-6 bg-paper animate-fade-in-up">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="font-mono text-xs uppercase tracking-widest font-bold">
+        <h3 className="font-mono text-xs uppercase tracking-widest font-semibold">
           New Mission / Project
         </h3>
         <button
@@ -82,7 +85,7 @@ export default function AddProjectForm() {
             setIsOpen(false);
           }}
           disabled={isSubmitting}
-          className="text-gray-400 hover:text-black disabled:text-gray-200"
+          className="text-ink-muted hover:text-ink disabled:text-ink-faint"
           aria-label="Close project form"
         >
           <X size={18} />
@@ -91,10 +94,7 @@ export default function AddProjectForm() {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <label
-            htmlFor="project-title"
-            className="font-mono text-[10px] uppercase tracking-widest text-gray-500"
-          >
+          <label htmlFor="project-title" className={labelClass}>
             Project Title
           </label>
           <input
@@ -103,12 +103,14 @@ export default function AddProjectForm() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="border-b border-gray-200 py-1 focus:border-black outline-none text-sm"
+            className={inputUnderlineClass}
             placeholder="e.g. Kedut - Kemana Duitku?"
           />
         </div>
 
-        <label className="flex items-center gap-3 border border-gray-200 p-3 font-mono text-[10px] uppercase tracking-widest text-gray-500">
+        <label
+          className={`flex items-center gap-3 border border-line p-3 ${labelClass}`}
+        >
           <input
             type="checkbox"
             checked={isPublished}
@@ -119,10 +121,7 @@ export default function AddProjectForm() {
         </label>
 
         <div className="flex flex-col gap-1">
-          <label
-            htmlFor="project-description"
-            className="font-mono text-[10px] uppercase tracking-widest text-gray-500"
-          >
+          <label htmlFor="project-description" className={labelClass}>
             Description
           </label>
           <textarea
@@ -131,17 +130,14 @@ export default function AddProjectForm() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
-            className="border-b border-gray-200 py-1 focus:border-black outline-none text-sm min-h-[80px] resize-none"
+            className={`${inputUnderlineClass} min-h-[80px] resize-none`}
             placeholder="What does this project do?"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
-            <label
-              htmlFor="project-tags"
-              className="font-mono text-[10px] uppercase tracking-widest text-gray-500"
-            >
+            <label htmlFor="project-tags" className={labelClass}>
               Tags (comma separated)
             </label>
             <input
@@ -149,15 +145,12 @@ export default function AddProjectForm() {
               disabled={isSubmitting}
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              className="border-b border-gray-200 py-1 focus:border-black outline-none text-sm"
+              className={inputUnderlineClass}
               placeholder="Next.js, Tailwind"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label
-              htmlFor="project-year"
-              className="font-mono text-[10px] uppercase tracking-widest text-gray-500"
-            >
+            <label htmlFor="project-year" className={labelClass}>
               Year
             </label>
             <input
@@ -165,17 +158,14 @@ export default function AddProjectForm() {
               disabled={isSubmitting}
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className="border-b border-gray-200 py-1 focus:border-black outline-none text-sm"
+              className={inputUnderlineClass}
               placeholder="2026"
             />
           </div>
         </div>
 
         <div className="flex flex-col gap-1">
-          <label
-            htmlFor="project-link"
-            className="font-mono text-[10px] uppercase tracking-widest text-gray-500"
-          >
+          <label htmlFor="project-link" className={labelClass}>
             Project URL (Optional)
           </label>
           <input
@@ -184,27 +174,16 @@ export default function AddProjectForm() {
             disabled={isSubmitting}
             value={link}
             onChange={(e) => setLink(e.target.value)}
-            className="border-b border-gray-200 py-1 focus:border-black outline-none text-sm"
+            className={inputUnderlineClass}
             placeholder="https://..."
           />
         </div>
 
-        {error && (
-          <p
-            role="alert"
-            className="border border-red-200 bg-red-50 p-3 text-xs text-red-700"
-          >
-            {error}
-          </p>
-        )}
+        {error && <FeedbackNote tone="error">{error}</FeedbackNote>}
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="mt-4 bg-black text-white py-3 text-xs font-mono uppercase tracking-widest hover:bg-gray-800 disabled:bg-gray-400 transition-colors"
-        >
+        <Button type="submit" disabled={isSubmitting} className="mt-4 w-full">
           {isSubmitting ? "Saving Project..." : "Initialize & Save Project"}
-        </button>
+        </Button>
       </form>
     </div>
   );

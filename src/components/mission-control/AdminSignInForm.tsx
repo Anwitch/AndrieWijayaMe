@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { KeyRound, LogIn } from "lucide-react";
+import { Button, FeedbackNote, inputClass, labelClass } from "@/components/ui";
 
 export default function AdminSignInForm() {
   const { signIn } = useAuthActions();
@@ -40,7 +41,7 @@ export default function AdminSignInForm() {
       <div>
         <label
           htmlFor="admin-email"
-          className="mb-2 block font-mono text-[10px] uppercase tracking-widest text-gray-500"
+          className={`mb-2 block ${labelClass}`}
         >
           Admin Email
         </label>
@@ -51,14 +52,14 @@ export default function AdminSignInForm() {
           autoComplete="username"
           required
           disabled={isSubmitting}
-          className="w-full border border-gray-300 bg-white px-4 py-3 text-sm outline-none transition-colors focus:border-black disabled:bg-gray-100"
+          className={`${inputClass} px-4 py-3`}
         />
       </div>
 
       <div>
         <label
           htmlFor="admin-password"
-          className="mb-2 block font-mono text-[10px] uppercase tracking-widest text-gray-500"
+          className={`mb-2 block ${labelClass}`}
         >
           Password
         </label>
@@ -70,10 +71,10 @@ export default function AdminSignInForm() {
           minLength={14}
           required
           disabled={isSubmitting}
-          className="w-full border border-gray-300 bg-white px-4 py-3 text-sm outline-none transition-colors focus:border-black disabled:bg-gray-100"
+          className={`${inputClass} px-4 py-3`}
         />
         {isSetup && (
-          <p className="mt-2 text-xs leading-relaxed text-gray-500">
+          <p className="mt-2 text-xs leading-relaxed text-ink-muted">
             Use at least 14 characters with uppercase, lowercase, number, and
             symbol.
           </p>
@@ -84,7 +85,7 @@ export default function AdminSignInForm() {
         <div>
           <label
             htmlFor="admin-setup-secret"
-            className="mb-2 block font-mono text-[10px] uppercase tracking-widest text-gray-500"
+            className={`mb-2 block ${labelClass}`}
           >
             Administrator Setup Code
           </label>
@@ -95,32 +96,21 @@ export default function AdminSignInForm() {
             autoComplete="off"
             required
             disabled={isSubmitting}
-            className="w-full border border-gray-300 bg-white px-4 py-3 font-mono text-sm outline-none transition-colors focus:border-black disabled:bg-gray-100"
+            className={`${inputClass} px-4 py-3 font-mono`}
           />
         </div>
       )}
 
-      {error && (
-        <p
-          role="alert"
-          className="border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-        >
-          {error}
-        </p>
-      )}
+      {error && <FeedbackNote tone="error">{error}</FeedbackNote>}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="flex w-full items-center justify-center gap-2 bg-black px-4 py-3 font-mono text-xs uppercase tracking-widest text-white transition-colors hover:bg-gray-800 disabled:bg-gray-400"
-      >
+      <Button type="submit" disabled={isSubmitting} className="w-full">
         {isSetup ? <KeyRound size={15} /> : <LogIn size={15} />}
         {isSubmitting
           ? "Authenticating..."
           : isSetup
             ? "Initialize Admin"
             : "Enter Mission Control"}
-      </button>
+      </Button>
 
       <button
         type="button"
@@ -129,7 +119,7 @@ export default function AdminSignInForm() {
           setError(null);
           setIsSetup((current) => !current);
         }}
-        className="w-full font-mono text-[10px] uppercase tracking-widest text-gray-400 hover:text-black disabled:text-gray-300"
+        className="w-full font-mono text-xs uppercase tracking-widest text-ink-muted hover:text-ink disabled:text-ink-faint"
       >
         {isSetup ? "Return to sign in" : "First-time administrator setup"}
       </button>

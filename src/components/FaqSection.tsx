@@ -1,4 +1,5 @@
 import { SITE_URL } from "@/lib/site-url";
+import { SectionHeading } from "@/components/ui";
 
 /**
  * Static FAQ in the brand voice (problem solver / product thinker). Content is
@@ -49,23 +50,18 @@ export default function FaqSection() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageSchema()) }}
       />
-      <div className="flex justify-between items-end mb-10 border-b border-gray-100 pb-4">
-        <h2 className="text-4xl font-bold">Tanya Jawab</h2>
-        <span className="font-mono text-xs text-gray-400 uppercase tracking-widest hidden md:block">
-          FAQ
-        </span>
-      </div>
+      <SectionHeading title="Tanya Jawab" aside="FAQ" />
 
       <dl className="grid grid-cols-1 gap-10">
         {FAQ_ITEMS.map((item) => (
           <div
             key={item.question}
-            className="border-b border-gray-100 pb-8 last:border-0"
+            className="border-b border-line pb-8 last:border-0"
           >
-            <dt className="text-2xl font-semibold text-[var(--text-primary)] mb-3">
+            <dt className="text-2xl font-semibold text-ink mb-3">
               {item.question}
             </dt>
-            <dd className="text-lg text-gray-600 leading-relaxed max-w-prose">
+            <dd className="text-lg text-ink-secondary leading-relaxed max-w-prose">
               {item.answer}
             </dd>
           </div>

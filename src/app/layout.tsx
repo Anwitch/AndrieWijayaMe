@@ -8,7 +8,7 @@ import { personSchema, webSiteSchema } from "@/lib/structured-data";
 import "./globals.css";
 
 const ibmPlexSans = IBM_Plex_Sans({
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -99,7 +99,7 @@ export default async function RootLayout({
   return (
     <html lang="id" className="h-full" suppressHydrationWarning>
       <body
-        className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} font-sans antialiased min-h-full flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)]`}
+        className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} font-sans antialiased min-h-full flex flex-col bg-paper text-ink`}
       >
         <script
           type="application/ld+json"

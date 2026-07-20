@@ -15,6 +15,12 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {
+  Button,
+  FeedbackNote,
+  inputUnderlineClass,
+  labelClass,
+} from "@/components/ui";
 import { getErrorMessage } from "@/lib/errors";
 
 export default function AddPostForm() {
@@ -106,19 +112,16 @@ export default function AddPostForm() {
 
   if (!isOpen) {
     return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-mono uppercase tracking-widest hover:bg-gray-800 transition-colors rounded-sm"
-      >
+      <Button type="button" onClick={() => setIsOpen(true)} className="py-2">
         <PenLine size={14} /> New Mission Log
-      </button>
+      </Button>
     );
   }
 
   return (
-    <div className="border border-black p-6 bg-white animate-fade-in-up">
+    <div className="border border-ink p-6 bg-paper animate-fade-in-up">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="font-mono text-xs uppercase tracking-widest font-bold">
+        <h3 className="font-mono text-xs uppercase tracking-widest font-semibold">
           New Mission Log
         </h3>
         <button
@@ -128,7 +131,7 @@ export default function AddPostForm() {
             setIsOpen(false);
           }}
           disabled={isSubmitting}
-          className="text-gray-400 hover:text-black disabled:text-gray-200"
+          className="text-ink-muted hover:text-ink disabled:text-ink-faint"
           aria-label="Close post form"
         >
           <X size={18} />
@@ -138,10 +141,7 @@ export default function AddPostForm() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
-            <label
-              htmlFor="post-title"
-              className="font-mono text-[10px] uppercase tracking-widest text-gray-500"
-            >
+            <label htmlFor="post-title" className={labelClass}>
               Title
             </label>
             <input
@@ -150,16 +150,13 @@ export default function AddPostForm() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="border-b border-gray-200 py-1 focus:border-black outline-none text-sm"
+              className={inputUnderlineClass}
               placeholder="e.g. My First Mission Log"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label
-              htmlFor="post-category"
-              className="font-mono text-[10px] uppercase tracking-widest text-gray-500"
-            >
+            <label htmlFor="post-category" className={labelClass}>
               Category
             </label>
             <input
@@ -167,17 +164,14 @@ export default function AddPostForm() {
               disabled={isSubmitting}
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="border-b border-gray-200 py-1 focus:border-black outline-none text-sm"
+              className={inputUnderlineClass}
               placeholder="e.g. Engineering, Research, Travel"
             />
           </div>
         </div>
 
         <div className="flex flex-col gap-1">
-          <label
-            htmlFor="post-excerpt"
-            className="font-mono text-[10px] uppercase tracking-widest text-gray-500"
-          >
+          <label htmlFor="post-excerpt" className={labelClass}>
             Excerpt (Optional)
           </label>
           <input
@@ -185,19 +179,19 @@ export default function AddPostForm() {
             disabled={isSubmitting}
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
-            className="border-b border-gray-200 py-1 focus:border-black outline-none text-sm"
+            className={inputUnderlineClass}
             placeholder="Short summary of the post"
           />
         </div>
 
         <div className="flex flex-col gap-2">
-          <div className="flex justify-between items-center bg-gray-50 p-1 border border-gray-200">
+          <div className="flex justify-between items-center bg-surface p-1 border border-line">
             <div className="flex gap-1">
               <button
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => setTab("edit")}
-                className={`px-3 py-1 text-[10px] font-mono uppercase tracking-widest flex items-center gap-1.5 transition-colors ${tab === "edit" ? "bg-black text-white" : "hover:bg-gray-200"}`}
+                className={`px-3 py-1 text-xs font-mono uppercase tracking-widest flex items-center gap-1.5 transition-colors ${tab === "edit" ? "bg-ink text-paper" : "hover:bg-line"}`}
               >
                 <Edit3 size={12} /> Edit
               </button>
@@ -205,19 +199,19 @@ export default function AddPostForm() {
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => setTab("preview")}
-                className={`px-3 py-1 text-[10px] font-mono uppercase tracking-widest flex items-center gap-1.5 transition-colors ${tab === "preview" ? "bg-black text-white" : "hover:bg-gray-200"}`}
+                className={`px-3 py-1 text-xs font-mono uppercase tracking-widest flex items-center gap-1.5 transition-colors ${tab === "preview" ? "bg-ink text-paper" : "hover:bg-line"}`}
               >
                 <Eye size={12} /> Preview
               </button>
             </div>
 
             {tab === "edit" && (
-              <div className="flex gap-1 border-l border-gray-200 pl-1 ml-1">
+              <div className="flex gap-1 border-l border-line pl-1 ml-1">
                 <button
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => insertText("**", "**")}
-                  className="p-1 hover:bg-white transition-colors"
+                  className="p-1 hover:bg-paper transition-colors"
                   title="Bold"
                 >
                   <Bold size={14} />
@@ -226,7 +220,7 @@ export default function AddPostForm() {
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => insertText("*", "*")}
-                  className="p-1 hover:bg-white transition-colors"
+                  className="p-1 hover:bg-paper transition-colors"
                   title="Italic"
                 >
                   <Italic size={14} />
@@ -235,7 +229,7 @@ export default function AddPostForm() {
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => insertText("\n- ")}
-                  className="p-1 hover:bg-white transition-colors"
+                  className="p-1 hover:bg-paper transition-colors"
                   title="Bullet List"
                 >
                   <List size={14} />
@@ -244,7 +238,7 @@ export default function AddPostForm() {
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => insertText("\n1. ")}
-                  className="p-1 hover:bg-white transition-colors"
+                  className="p-1 hover:bg-paper transition-colors"
                   title="Numbered List"
                 >
                   <ListOrdered size={14} />
@@ -261,25 +255,25 @@ export default function AddPostForm() {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               required
-              className="border border-gray-200 p-3 outline-none text-sm min-h-[400px] font-mono focus:border-black transition-colors"
+              className="border border-line p-3 outline-none text-sm min-h-[400px] font-mono focus:border-ink transition-colors"
               placeholder="# Introduction..."
             />
           ) : (
-            <div className="border border-gray-200 p-8 min-h-[400px] bg-white overflow-y-auto">
+            <div className="border border-line p-8 min-h-[400px] bg-paper overflow-y-auto">
               <article
-                className="prose prose-slate max-w-none prose-sm
-                prose-headings:text-[var(--text-primary)] prose-headings:font-semibold
-                prose-p:text-[var(--text-secondary)] prose-p:leading-relaxed prose-p:mb-4
-                prose-strong:text-[var(--text-primary)] prose-strong:font-semibold
-                prose-code:text-[var(--accent-primary)] prose-code:bg-[var(--bg-surface)] prose-code:px-1 prose-code:rounded-sm
-                prose-pre:bg-[var(--text-primary)] prose-pre:text-white prose-pre:rounded-sm"
+                className="prose max-w-none prose-sm
+                prose-headings:text-ink prose-headings:font-semibold
+                prose-p:text-ink-secondary prose-p:leading-relaxed prose-p:mb-4
+                prose-strong:text-ink prose-strong:font-semibold
+                prose-code:text-accent prose-code:bg-accent-subtle prose-code:px-1 prose-code:rounded-sm
+                prose-pre:bg-ink prose-pre:text-paper prose-pre:rounded-sm"
               >
                 {content ? (
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {content}
                   </ReactMarkdown>
                 ) : (
-                  <div className="text-gray-300 italic font-mono text-xs uppercase tracking-widest">
+                  <div className="text-ink-faint italic font-mono text-xs uppercase tracking-widest">
                     Waiting for transmission... (No content to preview)
                   </div>
                 )}
@@ -288,22 +282,11 @@ export default function AddPostForm() {
           )}
         </div>
 
-        {error && (
-          <p
-            role="alert"
-            className="border border-red-200 bg-red-50 p-3 text-xs text-red-700"
-          >
-            {error}
-          </p>
-        )}
+        {error && <FeedbackNote tone="error">{error}</FeedbackNote>}
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="mt-4 bg-black text-white py-3 text-xs font-mono uppercase tracking-widest hover:bg-gray-800 disabled:bg-gray-400 transition-colors"
-        >
+        <Button type="submit" disabled={isSubmitting} className="mt-4 w-full">
           {isSubmitting ? "Publishing Log..." : "Publish Mission Log"}
-        </button>
+        </Button>
       </form>
     </div>
   );

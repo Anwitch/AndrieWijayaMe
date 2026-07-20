@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import PublicShell from "@/components/PublicShell";
+import { Eyebrow, PageHeader } from "@/components/ui";
 import { getProfile } from "@/lib/profile.server";
 import { getSiteSettings } from "@/lib/site-settings.server";
 import { SITE_URL } from "@/lib/site-url";
@@ -56,15 +57,7 @@ export default async function AboutPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <main className="max-w-3xl mx-auto px-6 py-16 md:py-24 animate-fade-in-up">
-        <header className="mb-16">
-          <span className="font-mono text-xs uppercase tracking-widest text-[var(--accent-light)] mb-2 block">
-            Profil
-          </span>
-          <h1 className="text-4xl md:text-5xl font-semibold text-[var(--text-primary)] leading-tight">
-            Tentang {settings.siteName}
-          </h1>
-          <div className="mt-6 h-1 w-16 bg-[var(--accent-primary)]" />
-        </header>
+        <PageHeader eyebrow="Profil" title={`Tentang ${settings.siteName}`} />
 
         <div className="flex flex-col sm:flex-row gap-8 items-start mb-16">
           <Image
@@ -75,10 +68,10 @@ export default async function AboutPage() {
             className="rounded-sm shrink-0"
             priority
           />
-          <div className="text-lg text-[var(--text-secondary)] leading-relaxed">
+          <div className="text-lg text-ink-secondary leading-relaxed">
             <p>
               Aku {settings.siteName}, seorang{" "}
-              <strong className="text-[var(--text-primary)]">
+              <strong className="text-ink">
                 product thinker dan problem solver
               </strong>{" "}
               yang berbasis di {profile?.location || "Pontianak, Kalimantan Barat"}.
@@ -90,10 +83,10 @@ export default async function AboutPage() {
 
         <article className="space-y-16">
           <section>
-            <h2 className="font-mono text-xs uppercase tracking-widest text-[var(--text-muted)] mb-6">
+            <Eyebrow as="h2" className="block mb-6">
               Siapa Aku
-            </h2>
-            <div className="space-y-6 text-lg text-[var(--text-secondary)] leading-relaxed">
+            </Eyebrow>
+            <div className="space-y-6 text-lg text-ink-secondary leading-relaxed">
               <p>
                 Aku tidak ingin dikenal sekadar sebagai AI engineer, software
                 engineer, atau programmer. Aku ingin dikenal sebagai seseorang
@@ -112,15 +105,15 @@ export default async function AboutPage() {
           </section>
 
           <section>
-            <h2 className="font-mono text-xs uppercase tracking-widest text-[var(--text-muted)] mb-6">
+            <Eyebrow as="h2" className="block mb-6">
               Cara Berpikirku
-            </h2>
-            <div className="space-y-6 text-lg text-[var(--text-secondary)] leading-relaxed">
+            </Eyebrow>
+            <div className="space-y-6 text-lg text-ink-secondary leading-relaxed">
               <p>
                 Ketika melihat suatu aktivitas, pertanyaan pertamaku bukan
                 “teknologi apa yang bisa dipakai?”, melainkan:
               </p>
-              <ul className="space-y-3 border-l-2 border-[var(--accent-primary)] pl-6 italic">
+              <ul className="space-y-3 border-l-2 border-ink pl-6 italic">
                 <li>“Kenapa proses ini masih seperti ini?”</li>
                 <li>“Kenapa belum didigitalisasi?”</li>
                 <li>
@@ -136,10 +129,10 @@ export default async function AboutPage() {
           </section>
 
           <section>
-            <h2 className="font-mono text-xs uppercase tracking-widest text-[var(--text-muted)] mb-6">
+            <Eyebrow as="h2" className="block mb-6">
               Cara Kerjaku
-            </h2>
-            <ol className="space-y-4 text-lg text-[var(--text-secondary)] leading-relaxed list-none">
+            </Eyebrow>
+            <ol className="space-y-4 text-lg text-ink-secondary leading-relaxed list-none">
               {[
                 "Menemukan fenomena menarik di kehidupan nyata.",
                 "Bertanya mengapa proses tersebut masih dilakukan dengan cara sekarang.",
@@ -149,7 +142,7 @@ export default async function AboutPage() {
                 "Mendokumentasikan seluruh proses berpikir tersebut.",
               ].map((step, i) => (
                 <li key={step} className="flex gap-4">
-                  <span className="font-mono text-xs text-[var(--accent-light)] pt-2 tabular-nums">
+                  <span className="font-mono text-xs text-accent pt-2 tabular-nums">
                     0{i + 1}
                   </span>
                   <span>{step}</span>
@@ -159,13 +152,13 @@ export default async function AboutPage() {
           </section>
 
           <section>
-            <h2 className="font-mono text-xs uppercase tracking-widest text-[var(--text-muted)] mb-6">
+            <Eyebrow as="h2" className="block mb-6">
               Fokus Saat Ini
-            </h2>
-            <div className="space-y-4 text-lg text-[var(--text-secondary)] leading-relaxed">
+            </Eyebrow>
+            <div className="space-y-4 text-lg text-ink-secondary leading-relaxed">
               {profile?.specialization && (
                 <p>
-                  <span className="font-semibold text-[var(--text-primary)]">
+                  <span className="font-semibold text-ink">
                     Spesialisasi:
                   </span>{" "}
                   {profile.specialization}
@@ -173,7 +166,7 @@ export default async function AboutPage() {
               )}
               {profile?.currentFocus && (
                 <p>
-                  <span className="font-semibold text-[var(--text-primary)]">
+                  <span className="font-semibold text-ink">
                     Sedang mendalami:
                   </span>{" "}
                   {profile.currentFocus}
@@ -188,8 +181,8 @@ export default async function AboutPage() {
             </div>
           </section>
 
-          <section className="border-t border-[var(--border-default)] pt-12">
-            <p className="text-lg text-[var(--text-secondary)] leading-relaxed">
+          <section className="border-t border-line pt-12">
+            <p className="text-lg text-ink-secondary leading-relaxed">
               Teknologi akan terus berganti — hari ini AI, besok mungkin yang
               lain. Yang tidak berubah: ketertarikanku pada masalah nyata dan
               bagaimana menyelesaikannya.
@@ -197,9 +190,9 @@ export default async function AboutPage() {
           </section>
 
           <section>
-            <h2 className="font-mono text-xs uppercase tracking-widest text-[var(--text-muted)] mb-6">
+            <Eyebrow as="h2" className="block mb-6">
               Terhubung
-            </h2>
+            </Eyebrow>
             <div className="flex flex-wrap gap-6 text-lg">
               {socials.map((social) => (
                 <a
@@ -207,15 +200,12 @@ export default async function AboutPage() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[var(--accent-primary)] hover:underline"
+                  className="text-accent hover:underline"
                 >
                   {social.label} ↗
                 </a>
               ))}
-              <Link
-                href="/writing"
-                className="text-[var(--accent-primary)] hover:underline"
-              >
+              <Link href="/writing" className="text-accent hover:underline">
                 Baca tulisanku →
               </Link>
             </div>
