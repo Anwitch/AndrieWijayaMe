@@ -1,6 +1,8 @@
 import { query, mutation } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import { requireAdmin } from "./lib/admin";
+import { canonicalSlug, limitedText, requiredText } from "./lib/validation";
 
 export const create = mutation({
   args: {
@@ -13,17 +15,26 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    const slug = canonicalSlug(args.slug);
     const existingPost = await ctx.db
       .query("posts")
-      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
-      .first();
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .unique();
     if (existingPost) {
       throw new ConvexError("A post with this URL slug already exists.");
     }
 
+    const now = Date.now();
     const postId = await ctx.db.insert("posts", {
-      ...args,
-      publishedAt: Date.now(),
+      title: requiredText(args.title, "Post title", 200),
+      slug,
+      content: requiredText(args.content, "Post content", 200000),
+      excerpt: limitedText(args.excerpt, "Post excerpt", 500),
+      category: requiredText(args.category, "Post category", 100),
+      isPublished: args.isPublished,
+      publishedAt: now,
+      createdAt: now,
+      updatedAt: now,
     });
     return postId;
   },
@@ -42,7 +53,30 @@ export const update = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const { id, ...updates } = args;
-    await ctx.db.patch(id, updates);
+    if (args.title !== undefined) {
+      updates.title = requiredText(args.title, "Post title", 200);
+    }
+    if (args.content !== undefined) {
+      updates.content = requiredText(args.content, "Post content", 200000);
+    }
+    if (args.excerpt !== undefined) {
+      updates.excerpt = limitedText(args.excerpt, "Post excerpt", 500);
+    }
+    if (args.category !== undefined) {
+      updates.category = requiredText(args.category, "Post category", 100);
+    }
+    if (args.slug !== undefined) {
+      const slug = canonicalSlug(args.slug);
+      const existingPost = await ctx.db
+        .query("posts")
+        .withIndex("by_slug", (q) => q.eq("slug", slug))
+        .unique();
+      if (existingPost && existingPost._id !== id) {
+        throw new ConvexError("A post with this URL slug already exists.");
+      }
+      updates.slug = slug;
+    }
+    await ctx.db.patch(id, { ...updates, updatedAt: Date.now() });
   },
 });
 
@@ -55,21 +89,39 @@ export const remove = mutation({
 });
 
 export const listAll = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    return await ctx.db.query("posts").order("desc").collect();
+    return await ctx.db
+      .query("posts")
+      .order("desc")
+      .paginate(args.paginationOpts);
   },
 });
 
 export const listPublished = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
+    const result = await ctx.db
       .query("posts")
       .withIndex("by_isPublished_and_publishedAt", (q) => q.eq("isPublished", true))
       .order("desc")
-      .collect();
+      .paginate(args.paginationOpts);
+    return {
+      ...result,
+      page: result.page.map((post) => ({
+        _id: post._id,
+        _creationTime: post._creationTime,
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt,
+        category: post.category,
+        publishedAt: post.publishedAt,
+        isPublished: post.isPublished,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+      })),
+    };
   },
 });
 

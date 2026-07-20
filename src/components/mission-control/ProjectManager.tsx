@@ -6,6 +6,8 @@ import {
   Check,
   Edit2,
   ExternalLink,
+  Eye,
+  EyeOff,
   Settings,
   Star,
   Trash2,
@@ -17,6 +19,8 @@ import { getErrorMessage } from "@/lib/errors";
 
 interface ProjectManagerProps {
   projects: Doc<"projects">[] | undefined;
+  status: "LoadingFirstPage" | "CanLoadMore" | "LoadingMore" | "Exhausted";
+  onLoadMore: () => void;
 }
 
 const emptyProjectForm = {
@@ -27,7 +31,11 @@ const emptyProjectForm = {
   link: "",
 };
 
-export default function ProjectManager({ projects }: ProjectManagerProps) {
+export default function ProjectManager({
+  projects,
+  status,
+  onLoadMore,
+}: ProjectManagerProps) {
   const removeProject = useMutation(api.projects.removeProject);
   const updateProject = useMutation(api.projects.updateProject);
   const [editingProjectId, setEditingProjectId] =
@@ -117,7 +125,7 @@ export default function ProjectManager({ projects }: ProjectManagerProps) {
           </h2>
         </div>
         <span className="font-mono text-xs text-gray-400 uppercase tracking-widest">
-          {projects?.length ?? 0} Total Missions
+          {projects?.length ?? 0} Loaded Missions
         </span>
       </div>
 
@@ -156,6 +164,7 @@ export default function ProjectManager({ projects }: ProjectManagerProps) {
                 const isEditing = editingProjectId === project._id;
                 const isSaving = pendingAction === `save-${project._id}`;
                 const isDeleting = pendingAction === `delete-${project._id}`;
+                const isPublished = project.isPublished !== false;
 
                 return (
                   <tr
@@ -269,6 +278,22 @@ export default function ProjectManager({ projects }: ProjectManagerProps) {
                             <button
                               type="button"
                               onClick={() =>
+                                void runAction(`publish-${project._id}`, () =>
+                                  updateProject({
+                                    id: project._id,
+                                    isPublished: !isPublished,
+                                  }),
+                                )
+                              }
+                              disabled={pendingAction !== null}
+                              className={`p-1.5 rounded-full transition-all disabled:opacity-40 ${isPublished ? "text-green-600 bg-green-50" : "text-gray-300 hover:text-green-500"}`}
+                              title={isPublished ? "Unpublish project" : "Publish project"}
+                            >
+                              {isPublished ? <Eye size={16} /> : <EyeOff size={16} />}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
                                 void runAction(`feature-${project._id}`, () =>
                                   updateProject({
                                     id: project._id,
@@ -352,6 +377,16 @@ export default function ProjectManager({ projects }: ProjectManagerProps) {
             </tbody>
           </table>
         </div>
+      )}
+      {status !== "Exhausted" && projects !== undefined && (
+        <button
+          type="button"
+          onClick={onLoadMore}
+          disabled={status === "LoadingMore"}
+          className="mt-8 w-full border border-gray-200 py-3 font-mono text-xs uppercase tracking-widest text-gray-500 hover:border-black hover:text-black disabled:text-gray-300"
+        >
+          {status === "LoadingMore" ? "Loading Missions..." : "Load More Missions"}
+        </button>
       )}
     </section>
   );

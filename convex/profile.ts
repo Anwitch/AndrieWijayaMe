@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./lib/admin";
+import { limitedText } from "./lib/validation";
 
 const X_HOSTS = new Set(["x.com", "www.x.com", "twitter.com", "www.twitter.com"]);
 const INSTAGRAM_HOSTS = new Set(["instagram.com", "www.instagram.com"]);
@@ -45,6 +46,32 @@ export const update = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const updates = { ...args };
+    if (args.bio !== undefined) {
+      updates.bio = limitedText(args.bio, "Bio", 10000);
+    }
+    if (args.tagline !== undefined) {
+      updates.tagline = limitedText(args.tagline, "Tagline", 300);
+    }
+    if (args.location !== undefined) {
+      updates.location = limitedText(args.location, "Location", 160);
+    }
+    if (args.status !== undefined) {
+      updates.status = limitedText(args.status, "Status", 160);
+    }
+    if (args.specialization !== undefined) {
+      updates.specialization = limitedText(
+        args.specialization,
+        "Specialization",
+        300,
+      );
+    }
+    if (args.currentFocus !== undefined) {
+      updates.currentFocus = limitedText(
+        args.currentFocus,
+        "Current focus",
+        300,
+      );
+    }
     if (args.xUrl !== undefined) {
       updates.xUrl = validateSocialUrl(args.xUrl, "X URL", X_HOSTS);
     }
@@ -57,7 +84,7 @@ export const update = mutation({
     }
     const profile = await ctx.db.query("profile").unique();
     if (profile) {
-      await ctx.db.patch(profile._id, updates);
+      await ctx.db.patch(profile._id, { ...updates, updatedAt: Date.now() });
     } else {
       await ctx.db.insert("profile", {
         bio: "",
@@ -65,6 +92,7 @@ export const update = mutation({
         location: "",
         status: "",
         ...updates,
+        updatedAt: Date.now(),
       });
     }
   },

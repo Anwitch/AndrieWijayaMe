@@ -1,61 +1,91 @@
-"use client";
-
-import { useQuery } from "convex/react";
+import { fetchQuery } from "convex/nextjs";
 import { api } from "../../../../convex/_generated/api";
-import Navbar from "@/components/Navbar";
+import PublicShell from "@/components/PublicShell";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { getSiteSettings } from "@/lib/site-settings.server";
+import { SITE_URL } from "@/lib/site-url";
 
-export default function PostDetailPage() {
-  const params = useParams();
-  const slug = params.slug as string;
-  const post = useQuery(api.posts.getBySlug, { slug });
-
-  if (post === undefined) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Navbar />
-        <main className="max-w-3xl mx-auto px-6 py-24 animate-pulse">
-          <div className="h-4 bg-gray-100 w-24 mb-6"></div>
-          <div className="h-12 bg-gray-100 w-full mb-12"></div>
-          <div className="space-y-4">
-            <div className="h-4 bg-gray-100 w-full"></div>
-            <div className="h-4 bg-gray-100 w-full"></div>
-            <div className="h-4 bg-gray-100 w-3/4"></div>
-          </div>
-        </main>
-      </div>
-    );
+async function getPost(slug: string) {
+  try {
+    return await fetchQuery(api.posts.getBySlug, { slug });
+  } catch {
+    return null;
   }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPost(slug);
+  if (!post) {
+    return { title: "Log Not Found", robots: { index: false, follow: false } };
+  }
+  const url = `${SITE_URL}/writing/${post.slug}`;
+  return {
+    title: post.title,
+    description: post.excerpt,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      url,
+      title: post.title,
+      description: post.excerpt,
+      publishedTime: new Date(post.publishedAt).toISOString(),
+      modifiedTime: new Date(post.updatedAt ?? post.publishedAt).toISOString(),
+      authors: [SITE_URL],
+      section: post.category,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+    },
+  };
+}
+
+export default async function PostDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const [post, settings] = await Promise.all([getPost(slug), getSiteSettings()]);
 
   if (!post) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Navbar />
-        <main className="max-w-3xl mx-auto px-6 py-24 text-center">
-          <h1 className="text-2xl font-bold mb-4">Log Not Found</h1>
-          <p className="text-gray-500 mb-8">
-            The mission log you are looking for does not exist or has been
-            redacted.
-          </p>
-          <Link
-            href="/writing"
-            className="text-[var(--accent-primary)] font-mono text-xs uppercase tracking-widest hover:underline"
-          >
-            Back to Archive
-          </Link>
-        </main>
-      </div>
-    );
+    notFound();
   }
 
-  return (
-    <div className="min-h-screen bg-white font-sans text-[var(--text-primary)]">
-      <Navbar />
+  const url = `${SITE_URL}/writing/${post.slug}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt,
+    articleSection: post.category,
+    datePublished: new Date(post.publishedAt).toISOString(),
+    dateModified: new Date(post.updatedAt ?? post.publishedAt).toISOString(),
+    inLanguage: "id-ID",
+    url,
+    mainEntityOfPage: url,
+    image: `${SITE_URL}/opengraph-image`,
+    author: { "@type": "Person", name: settings.siteName, url: SITE_URL },
+    publisher: { "@type": "Person", name: settings.siteName, url: SITE_URL },
+  };
 
+  return (
+    <PublicShell>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <main className="max-w-3xl mx-auto px-6 py-16 md:py-24 animate-fade-in-up">
         <Link
           href="/writing"
@@ -108,18 +138,13 @@ export default function PostDetailPage() {
               Transmission End
             </h3>
             <p className="text-sm text-[var(--text-secondary)] italic">
-              You are reading a mission log from the digital journal of Andrie
-              Wijaya. Observations and technical notes recorded in the field.
+              You are reading a mission log from the digital journal of{" "}
+              {settings.siteName}. Observations and technical notes recorded in
+              the field.
             </p>
           </div>
         </section>
       </main>
-
-      <footer className="mt-24 border-t border-[var(--border-default)] py-12">
-        <div className="max-w-3xl mx-auto px-6 text-center text-[var(--text-muted)] text-xs font-mono uppercase tracking-widest">
-          &copy; 2026 Andrie Wijaya // Signal: Secured
-        </div>
-      </footer>
-    </div>
+    </PublicShell>
   );
 }

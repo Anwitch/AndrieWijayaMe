@@ -9,6 +9,8 @@ import { getErrorMessage } from "@/lib/errors";
 
 interface PostManagerProps {
   posts: Doc<"posts">[] | undefined;
+  status: "LoadingFirstPage" | "CanLoadMore" | "LoadingMore" | "Exhausted";
+  onLoadMore: () => void;
 }
 
 const emptyPostForm = {
@@ -18,7 +20,11 @@ const emptyPostForm = {
   content: "",
 };
 
-export default function PostManager({ posts }: PostManagerProps) {
+export default function PostManager({
+  posts,
+  status,
+  onLoadMore,
+}: PostManagerProps) {
   const removePost = useMutation(api.posts.remove);
   const updatePost = useMutation(api.posts.update);
   const [editingPostId, setEditingPostId] = useState<Id<"posts"> | null>(null);
@@ -103,7 +109,7 @@ export default function PostManager({ posts }: PostManagerProps) {
           </h2>
         </div>
         <span className="font-mono text-xs text-gray-400 uppercase tracking-widest">
-          {posts?.length ?? 0} Total Logs
+          {posts?.length ?? 0} Loaded Logs
         </span>
       </div>
 
@@ -309,6 +315,16 @@ export default function PostManager({ posts }: PostManagerProps) {
             </tbody>
           </table>
         </div>
+      )}
+      {status !== "Exhausted" && posts !== undefined && (
+        <button
+          type="button"
+          onClick={onLoadMore}
+          disabled={status === "LoadingMore"}
+          className="mt-8 w-full border border-gray-200 py-3 font-mono text-xs uppercase tracking-widest text-gray-500 hover:border-black hover:text-black disabled:text-gray-300"
+        >
+          {status === "LoadingMore" ? "Loading Logs..." : "Load More Logs"}
+        </button>
       )}
     </section>
   );

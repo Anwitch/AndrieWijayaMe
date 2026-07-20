@@ -7,12 +7,19 @@ export default defineSchema({
   projects: defineTable({
     title: v.string(),
     description: v.string(),
-    tags: v.string(), // We'll store as string and split later for simplicity, or use v.array(v.string())
+    tags: v.string(),
     year: v.string(),
     link: v.optional(v.string()),
     isFeatured: v.optional(v.boolean()),
+    // Optional during the migration window. Missing means published.
+    isPublished: v.optional(v.boolean()),
     createdAt: v.number(),
-  }),
+    updatedAt: v.optional(v.number()),
+  })
+    .index("by_isPublished_and_isFeatured", [
+      "isPublished",
+      "isFeatured",
+    ]),
   profile: defineTable({
     bio: v.string(),
     tagline: v.string(),
@@ -22,6 +29,7 @@ export default defineSchema({
     currentFocus: v.optional(v.string()),
     xUrl: v.optional(v.string()),
     instagramUrl: v.optional(v.string()),
+    updatedAt: v.optional(v.number()),
   }),
   posts: defineTable({
     title: v.string(),
@@ -31,7 +39,23 @@ export default defineSchema({
     category: v.string(),
     publishedAt: v.number(),
     isPublished: v.boolean(),
+    createdAt: v.optional(v.number()),
+    updatedAt: v.optional(v.number()),
   })
     .index("by_slug", ["slug"])
     .index("by_isPublished_and_publishedAt", ["isPublished", "publishedAt"]),
+  siteSettings: defineTable({
+    key: v.literal("global"),
+    siteName: v.string(),
+    seoTitle: v.string(),
+    seoDescription: v.string(),
+    navAboutLabel: v.string(),
+    navAboutVisible: v.boolean(),
+    navProjectsLabel: v.string(),
+    navProjectsVisible: v.boolean(),
+    navWritingLabel: v.string(),
+    navWritingVisible: v.boolean(),
+    footerText: v.string(),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
 });

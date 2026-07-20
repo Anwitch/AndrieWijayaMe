@@ -13,6 +13,7 @@ export default function AddProjectForm() {
   const [tags, setTags] = useState("");
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [link, setLink] = useState("");
+  const [isPublished, setIsPublished] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,12 +37,14 @@ export default function AddProjectForm() {
         tags: tags.trim(),
         year: year.trim(),
         link: link.trim() || undefined,
+        isPublished,
       });
       setTitle("");
       setDescription("");
       setTags("");
       setYear(new Date().getFullYear().toString());
       setLink("");
+      setIsPublished(true);
       setIsOpen(false);
     } catch (submitError) {
       setError(
@@ -104,6 +107,16 @@ export default function AddProjectForm() {
             placeholder="e.g. Kedut - Kemana Duitku?"
           />
         </div>
+
+        <label className="flex items-center gap-3 border border-gray-200 p-3 font-mono text-[10px] uppercase tracking-widest text-gray-500">
+          <input
+            type="checkbox"
+            checked={isPublished}
+            disabled={isSubmitting}
+            onChange={(event) => setIsPublished(event.target.checked)}
+          />
+          Publish immediately on the public projects archive
+        </label>
 
         <div className="flex flex-col gap-1">
           <label

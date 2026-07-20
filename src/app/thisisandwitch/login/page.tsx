@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import AdminSignInForm from "@/components/mission-control/AdminSignInForm";
 
 export const metadata: Metadata = {
-  title: "Mission Control Login | Andrie Wijaya",
+  title: "Mission Control Login",
   robots: { index: false, follow: false },
 };
 

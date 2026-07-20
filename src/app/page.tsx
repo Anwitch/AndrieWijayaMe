@@ -1,8 +1,8 @@
 "use client";
 
 import Hero from "@/components/Hero";
-import Navbar from "@/components/Navbar";
 import MetadataStrip from "@/components/MetadataStrip";
+import PublicShell from "@/components/PublicShell";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import ReactMarkdown from "react-markdown";
@@ -14,8 +14,7 @@ export default function Home() {
   const profile = useQuery(api.profile.get);
 
   return (
-    <>
-      <Navbar />
+    <PublicShell>
       <main className="max-w-6xl mx-auto px-6 py-12">
         <Hero isPublic />
         <MetadataStrip isPublic />
@@ -126,13 +125,7 @@ export default function Home() {
           </article>
         </div>
       </main>
-
-      <footer className="mt-24 border-t border-gray-200 py-12">
-        <div className="max-w-6xl mx-auto px-6 text-center text-gray-500 text-sm font-mono uppercase tracking-widest">
-          &copy; 2026 Andrie Wijaya // Mission Control: Restricted
-        </div>
-      </footer>
-    </>
+    </PublicShell>
   );
 }
 

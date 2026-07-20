@@ -12,9 +12,11 @@ import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as lib_admin from "../lib/admin.js";
+import type * as lib_validation from "../lib/validation.js";
 import type * as posts from "../posts.js";
 import type * as profile from "../profile.js";
 import type * as projects from "../projects.js";
+import type * as siteSettings from "../siteSettings.js";
 
 import type {
   ApiFromModules,
@@ -27,9 +29,11 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
   "lib/admin": typeof lib_admin;
+  "lib/validation": typeof lib_validation;
   posts: typeof posts;
   profile: typeof profile;
   projects: typeof projects;
+  siteSettings: typeof siteSettings;
 }>;
 
 /**

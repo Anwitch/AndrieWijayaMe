@@ -1,17 +1,29 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
-import { useQuery } from "convex/react";
+import { useEffect } from "react";
+import PublicShell from "@/components/PublicShell";
+import { usePaginatedQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 
 export default function ProjectsArchive() {
-  const projects = useQuery(api.projects.getProjects);
+  const { results: projectResults, status, loadMore } = usePaginatedQuery(
+    api.projects.listPublished,
+    {},
+    { initialNumItems: 50 },
+  );
+  const projects = projectResults.filter((project) => project !== null);
+  const isLoading = status === "LoadingFirstPage";
+
+  useEffect(() => {
+    if (projects.length === 0 && status === "CanLoadMore") {
+      loadMore(50);
+    }
+  }, [loadMore, projects.length, status]);
 
   return (
-    <>
-      <Navbar />
+    <PublicShell>
       <main className="max-w-6xl mx-auto px-6 py-16 min-h-screen">
         <Link
           href="/"
@@ -52,7 +64,7 @@ export default function ProjectsArchive() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--bg-secondary)]">
-              {projects === undefined ? (
+              {isLoading ? (
                 [1, 2, 3, 4, 5, 6].map((i) => (
                   <tr key={i} className="animate-pulse">
                     <td className="py-8 pl-6 pr-8">
@@ -70,13 +82,22 @@ export default function ProjectsArchive() {
                     </td>
                   </tr>
                 ))
-              ) : projects.length === 0 ? (
+              ) : projects.length === 0 && status === "Exhausted" ? (
                 <tr>
                   <td
                     colSpan={4}
                     className="py-20 text-center font-mono text-xs text-gray-400 uppercase tracking-widest"
                   >
                     No missions found in the logs.
+                  </td>
+                </tr>
+              ) : projects.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="py-20 text-center font-mono text-xs text-gray-400 uppercase tracking-widest"
+                  >
+                    Scanning mission logs...
                   </td>
                 </tr>
               ) : (
@@ -126,13 +147,17 @@ export default function ProjectsArchive() {
             </tbody>
           </table>
         </div>
+        {status !== "Exhausted" && (
+          <button
+            type="button"
+            onClick={() => loadMore(50)}
+            disabled={status === "LoadingMore"}
+            className="mt-10 w-full border border-[var(--border-default)] py-3 font-mono text-xs uppercase tracking-widest text-[var(--text-muted)] transition-colors hover:border-black hover:text-black disabled:text-gray-300"
+          >
+            {status === "LoadingMore" ? "Loading Missions..." : "Load More Missions"}
+          </button>
+        )}
       </main>
-
-      <footer className="mt-24 border-t border-[var(--border-default)] py-12">
-        <div className="max-w-6xl mx-auto px-6 text-center text-[var(--text-muted)] text-[10px] font-mono uppercase tracking-widest">
-          &copy; 2026 Andrie Wijaya // Mission Archive Complete
-        </div>
-      </footer>
-    </>
+    </PublicShell>
   );
 }

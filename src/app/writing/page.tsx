@@ -1,18 +1,20 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { usePaginatedQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import Navbar from "@/components/Navbar";
+import PublicShell from "@/components/PublicShell";
 import Link from "next/link";
-import { Doc } from "../../../convex/_generated/dataModel";
 
 export default function WritingPage() {
-  const posts = useQuery(api.posts.listPublished);
+  const { results: posts, status, loadMore } = usePaginatedQuery(
+    api.posts.listPublished,
+    {},
+    { initialNumItems: 20 },
+  );
+  const isLoading = status === "LoadingFirstPage";
 
   return (
-    <div className="min-h-screen bg-white font-sans text-[var(--text-primary)]">
-      <Navbar />
-
+    <PublicShell>
       <main className="max-w-5xl mx-auto px-6 py-16 animate-fade-in-up">
         <header className="mb-16">
           <span className="font-mono text-xs uppercase tracking-widest text-[var(--accent-light)] mb-2 block">
@@ -28,7 +30,7 @@ export default function WritingPage() {
         </header>
 
         <div className="grid grid-cols-1 gap-12">
-          {posts === undefined ? (
+          {isLoading ? (
             <div className="animate-pulse space-y-8">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="border-b border-gray-100 pb-8">
@@ -45,7 +47,7 @@ export default function WritingPage() {
               </span>
             </div>
           ) : (
-            posts.map((post: Doc<"posts">) => (
+            posts.map((post) => (
               <article
                 key={post._id}
                 className="group border-b border-gray-100 pb-12 last:border-0"
@@ -81,13 +83,17 @@ export default function WritingPage() {
             ))
           )}
         </div>
+        {status !== "Exhausted" && (
+          <button
+            type="button"
+            onClick={() => loadMore(20)}
+            disabled={status === "LoadingMore"}
+            className="mt-12 w-full border border-[var(--border-default)] py-3 font-mono text-xs uppercase tracking-widest text-[var(--text-muted)] transition-colors hover:border-black hover:text-black disabled:text-gray-300"
+          >
+            {status === "LoadingMore" ? "Loading Logs..." : "Load More Logs"}
+          </button>
+        )}
       </main>
-
-      <footer className="mt-24 border-t border-[var(--border-default)] py-12">
-        <div className="max-w-5xl mx-auto px-6 text-center text-[var(--text-muted)] text-xs font-mono uppercase tracking-widest">
-          &copy; 2026 Andrie Wijaya // Data Stream: Stable
-        </div>
-      </footer>
-    </div>
+    </PublicShell>
   );
 }

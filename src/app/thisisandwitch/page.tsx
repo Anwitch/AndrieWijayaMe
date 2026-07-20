@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery } from "convex/react";
+import { usePaginatedQuery, useQuery } from "convex/react";
 import { ArrowLeft, Layout, PenLine } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "../../../convex/_generated/api";
@@ -11,6 +11,7 @@ import AddProjectForm from "@/components/AddProjectForm";
 import PostManager from "@/components/mission-control/PostManager";
 import ProfilePanel from "@/components/mission-control/ProfilePanel";
 import ProjectManager from "@/components/mission-control/ProjectManager";
+import SiteSettingsPanel from "@/components/mission-control/SiteSettingsPanel";
 
 export default function MissionControl() {
   const isAdmin = useQuery(api.admin.isCurrentUserAdmin);
@@ -27,9 +28,18 @@ export default function MissionControl() {
 }
 
 function MissionControlContent() {
-  const projects = useQuery(api.projects.getProjects);
-  const posts = useQuery(api.posts.listAll);
+  const {
+    results: projects,
+    status: projectStatus,
+    loadMore: loadMoreProjects,
+  } = usePaginatedQuery(api.projects.listAll, {}, { initialNumItems: 50 });
+  const {
+    results: posts,
+    status: postStatus,
+    loadMore: loadMorePosts,
+  } = usePaginatedQuery(api.posts.listAll, {}, { initialNumItems: 50 });
   const profile = useQuery(api.profile.get);
+  const siteSettings = useQuery(api.siteSettings.get);
   const { signOut } = useAuthActions();
   const router = useRouter();
 
@@ -75,6 +85,7 @@ function MissionControlContent() {
       <main className="max-w-7xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-12">
         <aside className="space-y-8">
           <ProfilePanel profile={profile} />
+          <SiteSettingsPanel settings={siteSettings} />
           <section className="bg-white border border-gray-200 p-6 rounded-sm shadow-sm">
             <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-2">
               <Layout size={18} className="text-gray-400" />
@@ -96,8 +107,18 @@ function MissionControlContent() {
         </aside>
 
         <div className="space-y-12">
-          <ProjectManager projects={projects} />
-          <PostManager posts={posts} />
+          <ProjectManager
+            projects={
+              projectStatus === "LoadingFirstPage" ? undefined : projects
+            }
+            status={projectStatus}
+            onLoadMore={() => loadMoreProjects(50)}
+          />
+          <PostManager
+            posts={postStatus === "LoadingFirstPage" ? undefined : posts}
+            status={postStatus}
+            onLoadMore={() => loadMorePosts(50)}
+          />
         </div>
       </main>
     </div>

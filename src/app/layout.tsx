@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
+import { getSiteSettings } from "@/lib/site-settings.server";
+import { getProfile } from "@/lib/profile.server";
+import { SITE_URL } from "@/lib/site-url";
+import { personSchema, webSiteSchema } from "@/lib/structured-data";
 import "./globals.css";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -15,26 +19,89 @@ const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-mono",
 });
 
-export const metadata: Metadata = {
-  title: "Andrie Wijaya | Software Developer",
-  description:
-    "Digital Journal of Andrie Wijaya, a Software Developer based in Pontianak, Indonesia.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: settings.seoTitle,
+      template: `%s | ${settings.siteName}`,
+    },
+    description: settings.seoDescription,
+    applicationName: settings.siteName,
+    authors: [{ name: settings.siteName, url: SITE_URL }],
+    creator: settings.siteName,
+    publisher: settings.siteName,
+    keywords: [
+      "Andrie Wijaya",
+      "problem solver",
+      "product thinker",
+      "transformasi digital",
+      "otomasi proses bisnis",
+      "desain solusi digital",
+      "AI",
+      "Pontianak",
+    ],
+    alternates: { canonical: "/" },
+    openGraph: {
+      type: "website",
+      locale: "id_ID",
+      url: SITE_URL,
+      siteName: settings.siteName,
+      title: settings.seoTitle,
+      description: settings.seoDescription,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: settings.seoTitle,
+      description: settings.seoDescription,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
+  };
+}
 
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [siteSettings, profile] = await Promise.all([
+    getSiteSettings(),
+    getProfile(),
+  ]);
+  const sameAs = [profile?.xUrl, profile?.instagramUrl].filter(
+    (url): url is string => Boolean(url),
+  );
+  const jsonLd = [
+    personSchema(siteSettings, sameAs),
+    webSiteSchema(siteSettings),
+  ];
+
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
+    <html lang="id" className="h-full" suppressHydrationWarning>
       <body
         className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} font-sans antialiased min-h-full flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)]`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <ConvexAuthNextjsServerProvider>
-          <ConvexClientProvider>{children}</ConvexClientProvider>
+          <ConvexClientProvider initialSiteSettings={siteSettings}>
+            {children}
+          </ConvexClientProvider>
         </ConvexAuthNextjsServerProvider>
       </body>
     </html>
