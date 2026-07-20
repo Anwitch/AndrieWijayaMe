@@ -1,15 +1,17 @@
 "use client";
 
 import EditableText from "./EditableText";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { api } from "../../convex/_generated/api";
 
 export default function MetadataStrip({
+  profile,
   isPublic = false,
 }: {
+  profile: FunctionReturnType<typeof api.profile.get>;
   isPublic?: boolean;
 }) {
-  const profile = useQuery(api.profile.get);
   const updateProfile = useMutation(api.profile.update);
 
   const metadata = [

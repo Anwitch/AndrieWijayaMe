@@ -42,7 +42,14 @@ export async function generateMetadata(): Promise<Metadata> {
       "AI",
       "Pontianak",
     ],
-    alternates: { canonical: "/" },
+    alternates: {
+      canonical: "/",
+      types: {
+        "application/rss+xml": [
+          { url: "/feed.xml", title: `${settings.siteName} — Tulisan` },
+        ],
+      },
+    },
     openGraph: {
       type: "website",
       locale: "id_ID",
@@ -85,7 +92,7 @@ export default async function RootLayout({
     (url): url is string => Boolean(url),
   );
   const jsonLd = [
-    personSchema(siteSettings, sameAs),
+    personSchema(siteSettings, sameAs, profile?.avatarUrl ?? undefined),
     webSiteSchema(siteSettings),
   ];
 

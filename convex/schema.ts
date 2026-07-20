@@ -25,12 +25,30 @@ export default defineSchema({
     tagline: v.string(),
     location: v.string(),
     status: v.string(),
+    avatarMediaId: v.optional(v.id("media")),
     specialization: v.optional(v.string()),
     currentFocus: v.optional(v.string()),
     xUrl: v.optional(v.string()),
     instagramUrl: v.optional(v.string()),
     updatedAt: v.optional(v.number()),
   }),
+  media: defineTable({
+    storageId: v.id("_storage"),
+    originalName: v.string(),
+    contentType: v.string(),
+    size: v.number(),
+    purpose: v.union(
+      v.literal("profile-avatar"),
+      v.literal("project-cover"),
+      v.literal("post-cover"),
+    ),
+    altText: v.string(),
+    uploadedBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_storageId", ["storageId"])
+    .index("by_purpose", ["purpose"]),
   posts: defineTable({
     title: v.string(),
     slug: v.string(),

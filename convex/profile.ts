@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./lib/admin";
 import { limitedText } from "./lib/validation";
+import { storageMatchesMedia } from "./lib/media";
 
 const X_HOSTS = new Set(["x.com", "www.x.com", "twitter.com", "www.twitter.com"]);
 const INSTAGRAM_HOSTS = new Set(["instagram.com", "www.instagram.com"]);
@@ -28,7 +29,72 @@ function validateSocialUrl(
 export const get = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("profile").unique();
+    const profile = await ctx.db.query("profile").unique();
+    if (!profile) return null;
+
+    if (!profile.avatarMediaId) {
+      return { ...profile, avatarUrl: null, avatarAltText: null };
+    }
+
+    const media = await ctx.db.get("media", profile.avatarMediaId);
+    if (!media || media.purpose !== "profile-avatar") {
+      return { ...profile, avatarUrl: null, avatarAltText: null };
+    }
+    const metadata = await ctx.db.system.get("_storage", media.storageId);
+    if (!metadata || !storageMatchesMedia(metadata, media)) {
+      return { ...profile, avatarUrl: null, avatarAltText: null };
+    }
+
+    return {
+      ...profile,
+      avatarUrl: await ctx.storage.getUrl(media.storageId),
+      avatarAltText: media.altText || null,
+    };
+  },
+});
+
+export const setAvatar = mutation({
+  args: { mediaId: v.union(v.id("media"), v.null()) },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const profile = await ctx.db.query("profile").unique();
+
+    if (args.mediaId === null) {
+      if (profile) {
+        await ctx.db.patch("profile", profile._id, {
+          avatarMediaId: undefined,
+          updatedAt: Date.now(),
+        });
+      }
+      return null;
+    }
+
+    const media = await ctx.db.get("media", args.mediaId);
+    if (!media) throw new ConvexError("Media not found.");
+    if (media.purpose !== "profile-avatar") {
+      throw new ConvexError("Only profile avatar media can be selected.");
+    }
+    const metadata = await ctx.db.system.get("_storage", media.storageId);
+    if (!metadata || !storageMatchesMedia(metadata, media)) {
+      throw new ConvexError("The selected media file is no longer valid.");
+    }
+
+    if (profile) {
+      await ctx.db.patch("profile", profile._id, {
+        avatarMediaId: media._id,
+        updatedAt: Date.now(),
+      });
+    } else {
+      await ctx.db.insert("profile", {
+        bio: "",
+        tagline: "",
+        location: "",
+        status: "",
+        avatarMediaId: media._id,
+        updatedAt: Date.now(),
+      });
+    }
+    return null;
   },
 });
 

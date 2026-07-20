@@ -12,6 +12,7 @@ import PostManager from "@/components/mission-control/PostManager";
 import ProfilePanel from "@/components/mission-control/ProfilePanel";
 import ProjectManager from "@/components/mission-control/ProjectManager";
 import SiteSettingsPanel from "@/components/mission-control/SiteSettingsPanel";
+import MediaManager from "@/components/mission-control/MediaManager";
 
 export default function MissionControl() {
   const isAdmin = useQuery(api.admin.isCurrentUserAdmin);
@@ -107,6 +108,7 @@ function MissionControlContent() {
         </aside>
 
         <div className="space-y-12">
+          <MediaManager />
           <ProjectManager
             projects={
               projectStatus === "LoadingFirstPage" ? undefined : projects

@@ -3,11 +3,12 @@
 import { useMutation } from "convex/react";
 import { User } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
-import type { Doc } from "../../../convex/_generated/dataModel";
+import type { FunctionReturnType } from "convex/server";
 import EditableText from "@/components/EditableText";
+import ProfileImageEditor from "@/components/mission-control/ProfileImageEditor";
 
 interface ProfilePanelProps {
-  profile: Doc<"profile"> | null | undefined;
+  profile: FunctionReturnType<typeof api.profile.get> | undefined;
 }
 
 export default function ProfilePanel({ profile }: ProfilePanelProps) {
@@ -38,6 +39,8 @@ export default function ProfilePanel({ profile }: ProfilePanelProps) {
       </div>
 
       <div className="space-y-6">
+        <ProfileImageEditor profile={profile} />
+
         <div>
           <div className="font-mono text-[10px] uppercase tracking-widest text-gray-400 mb-1">
             Bio Summary

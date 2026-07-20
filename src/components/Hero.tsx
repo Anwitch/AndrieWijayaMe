@@ -2,12 +2,18 @@
 
 import Image from "next/image";
 import EditableText from "./EditableText";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { api } from "../../convex/_generated/api";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 
-export default function Hero({ isPublic = false }: { isPublic?: boolean }) {
-  const profile = useQuery(api.profile.get);
+export default function Hero({
+  profile,
+  isPublic = false,
+}: {
+  profile: FunctionReturnType<typeof api.profile.get>;
+  isPublic?: boolean;
+}) {
   const settings = useSiteSettings();
   const updateProfile = useMutation(api.profile.update);
 
@@ -20,11 +26,11 @@ export default function Hero({ isPublic = false }: { isPublic?: boolean }) {
       <div className="flex-shrink-0">
         <div className="w-48 h-48 md:w-64 md:h-64 overflow-hidden rounded-full border-4 border-gray-100 shadow-sm">
           <Image
-            src="/FotoAndrieGantengKacamata.webp"
-            alt={settings.siteName}
+            src={profile?.avatarUrl ?? "/FotoAndrieGantengKacamata.webp"}
+            alt={profile?.avatarAltText ?? settings.siteName}
             width={256}
             height={256}
-            priority
+            preload
             className="w-full h-full object-cover"
           />
         </div>
