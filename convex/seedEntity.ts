@@ -42,6 +42,49 @@ const NEW_PROJECTS = [
   },
 ];
 
+const KEDUT_CASE_STUDY = `## Masalah
+
+Aplikasi pencatat keuangan jarang gagal karena kurang fitur — mereka gagal karena mencatat itu sendiri merepotkan. Buka aplikasi, pilih kategori, isi form: terlalu banyak langkah untuk transaksi sekecil beli bakso. Kebanyakan orang berhenti mencatat sebelum kebiasaannya sempat terbentuk.
+
+## Yang Aku Rancang
+
+Kedut (singkatan dari "Kemana Duitku?") menurunkan friksi pencatatan sampai sedekat mungkin dengan nol:
+
+- **Catat lewat chat.** Kirim pesan seperti "bakso 15k" ke bot Telegram dan transaksi tercatat — tidak perlu membuka aplikasi lain di tengah aktivitas.
+- **Parser bahasa natural tiga lapis.** Input diproses bertahap: parser lokal dulu, lalu Gemini AI, dengan fallback terakhir — sehingga "makan 35rb" maupun "gaji 10jt" tetap dipahami dengan biaya API seminimal mungkin.
+- **Review sebelum simpan.** AI hanya mengusulkan hasil parsing; tidak ada transaksi yang tersimpan otomatis tanpa konfirmasi pengguna.
+- **Dashboard web untuk analisis.** Tren pengeluaran, rincian kategori, gauge progres tabungan, dan insight berbahasa Indonesia yang bisa langsung ditindaklanjuti — misalnya "jajan kopi naik 10%, coba kurangi 2x minggu ini".
+
+## Keputusan Desain
+
+Pencatatan cepat dan analisis mendalam sengaja dipisah ke dua kanal: bot Telegram untuk momen transaksi, dashboard web untuk waktu evaluasi. Satu antarmuka yang mencoba melakukan keduanya biasanya berakhir buruk di keduanya.
+
+## Teknologi
+
+Next.js + Tailwind CSS (web), FastAPI/Python (backend & NLP), Supabase (PostgreSQL + auth), python-telegram-bot, Google Gemini.`;
+
+const REMELO_CASE_STUDY = `## Masalah
+
+Banyak dokter praktik mandiri masih mencatat rekam medis di kertas. Solusi RME yang tersedia umumnya berbasis cloud: berlangganan bulanan, bergantung pada internet stabil, dan data pasien tersimpan di server pihak ketiga — tiga hal yang justru menjadi penghalang bagi praktik kecil.
+
+## Yang Aku Rancang
+
+Remelo (Rekam Medis Elektronik Lokal) adalah aplikasi desktop yang berjalan sepenuhnya offline. Data pasien tersimpan di komputer dokter sendiri, tanpa biaya langganan.
+
+- **Pencatatan SOAP terstruktur** — Subjective, Objective, Assessment, Plan — dengan input tanda vital dan kalkulasi BMI otomatis.
+- **ICD-10 offline.** Autocomplete diagnosis dari 18.500+ kode ICD-10 tanpa koneksi internet.
+- **Dirancang untuk kecepatan konsultasi.** Navigasi antar field cukup dengan Enter, draft tersimpan otomatis, dan kunjungan pasien kontrol bisa disalin dari kunjungan sebelumnya.
+- **Data tetap milik dokter.** Database SQLite lokal, backup terenkripsi AES-256-GCM ke satu file portabel, dan auto-lock sesi saat komputer ditinggal.
+- **Dokumen administratif sekali klik.** Resume medis PDF, surat keterangan sakit/sehat, dan kartu pasien.
+
+## Keputusan Desain
+
+Offline-first di sini bukan keterbatasan, melainkan fitur: privasi data medis terjaga karena data tidak pernah meninggalkan komputer praktik, dan aplikasi tetap berfungsi penuh saat internet mati. Versi mobile (Flutter, Android, juga offline) sedang dikembangkan dengan prinsip yang sama.
+
+## Teknologi
+
+Electron, TypeScript, Vite, SQLite.`;
+
 /**
  * One-off data seed for the SEO/GEO entity plan (Task 7 steps 1-4).
  * Idempotent: safe to run again on dev or prod via
@@ -117,5 +160,52 @@ export const applySeoEntityData = internalMutation({
     }
 
     return summary.length > 0 ? summary : ["nothing to do (already applied)"];
+  },
+});
+
+/**
+ * Case studies drafted from the actual codebases (Kedut, Remelo) plus
+ * factual corrections (Remelo stack/year). Idempotent — patches by slug via
+ * `npx convex run seedEntity:applyCaseStudies [--prod]`.
+ */
+export const applyCaseStudies = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const summary: string[] = [];
+    const now = Date.now();
+
+    const kedut = await ctx.db
+      .query("projects")
+      .withIndex("by_slug", (q) => q.eq("slug", "kedut-kemana-duitku"))
+      .unique();
+    if (kedut) {
+      await ctx.db.patch(kedut._id, {
+        caseStudy: KEDUT_CASE_STUDY,
+        tags: "Next.js, FastAPI, Supabase, Gemini",
+        updatedAt: now,
+      });
+      summary.push("case study + tags set on Kedut");
+    }
+
+    const remelo = await ctx.db
+      .query("projects")
+      .withIndex("by_slug", (q) =>
+        q.eq("slug", "rekam-medis-elektronik-klinik"),
+      )
+      .unique();
+    if (remelo) {
+      await ctx.db.patch(remelo._id, {
+        title: "Remelo (Rekam Medis Elektronik)",
+        description:
+          "Aplikasi rekam medis elektronik desktop untuk dokter praktik mandiri — berjalan sepenuhnya offline dengan pencatatan SOAP, ICD-10 offline, dan backup terenkripsi.",
+        caseStudy: REMELO_CASE_STUDY,
+        tags: "Electron, TypeScript, SQLite",
+        year: "2026",
+        updatedAt: now,
+      });
+      summary.push("case study + corrected facts set on Remelo");
+    }
+
+    return summary.length > 0 ? summary : ["no matching projects found"];
   },
 });
