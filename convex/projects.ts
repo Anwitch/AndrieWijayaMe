@@ -1,12 +1,15 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./lib/admin";
 import {
+  canonicalSlug,
   limitedText,
   optionalHttpUrl,
   requiredText,
 } from "./lib/validation";
+import type { MutationCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 
 function newestFirst<T extends { _creationTime: number }>(rows: T[]) {
   return rows.sort((a, b) => b._creationTime - a._creationTime);
@@ -29,6 +32,20 @@ function sanitizePublicProjects<T extends { link?: string }>(projects: T[]) {
     ...project,
     link: safePublicLink(project.link),
   }));
+}
+
+async function assertSlugAvailable(
+  ctx: MutationCtx,
+  slug: string,
+  selfId?: Id<"projects">,
+) {
+  const existing = await ctx.db
+    .query("projects")
+    .withIndex("by_slug", (q) => q.eq("slug", slug))
+    .unique();
+  if (existing && existing._id !== selfId) {
+    throw new ConvexError("A project with this slug already exists.");
+  }
 }
 
 export const listPublished = query({
@@ -94,12 +111,19 @@ export const addProject = mutation({
     year: v.string(),
     tags: v.string(),
     link: v.optional(v.string()),
+    slug: v.optional(v.string()),
+    caseStudy: v.optional(v.string()),
     isFeatured: v.optional(v.boolean()),
     isPublished: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const now = Date.now();
+    let slug: string | undefined;
+    if (args.slug !== undefined && args.slug.trim() !== "") {
+      slug = canonicalSlug(args.slug);
+      await assertSlugAvailable(ctx, slug);
+    }
     await ctx.db.insert("projects", {
       title: requiredText(args.title, "Project title", 160),
       description: requiredText(
@@ -110,6 +134,11 @@ export const addProject = mutation({
       year: requiredText(args.year, "Project year", 32),
       tags: limitedText(args.tags, "Project tags", 500),
       link: optionalHttpUrl(args.link, "Project URL"),
+      slug,
+      caseStudy:
+        args.caseStudy !== undefined
+          ? limitedText(args.caseStudy, "Case study", 200000)
+          : undefined,
       isFeatured: args.isFeatured ?? false,
       isPublished: args.isPublished ?? true,
       createdAt: now,
@@ -134,6 +163,8 @@ export const updateProject = mutation({
     year: v.optional(v.string()),
     tags: v.optional(v.string()),
     link: v.optional(v.string()),
+    slug: v.optional(v.string()),
+    caseStudy: v.optional(v.string()),
     isFeatured: v.optional(v.boolean()),
     isPublished: v.optional(v.boolean()),
   },
@@ -159,6 +190,30 @@ export const updateProject = mutation({
     if (args.link !== undefined) {
       fields.link = optionalHttpUrl(args.link, "Project URL");
     }
+    if (args.slug !== undefined) {
+      if (args.slug.trim() === "") {
+        fields.slug = undefined;
+      } else {
+        const slug = canonicalSlug(args.slug);
+        await assertSlugAvailable(ctx, slug, id);
+        fields.slug = slug;
+      }
+    }
+    if (args.caseStudy !== undefined) {
+      fields.caseStudy = limitedText(args.caseStudy, "Case study", 200000);
+    }
     await ctx.db.patch(id, { ...fields, updatedAt: Date.now() });
+  },
+});
+
+export const getBySlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const project = await ctx.db
+      .query("projects")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .unique();
+    if (!project || project.isPublished === false) return null;
+    return sanitizePublicProjects([project])[0];
   },
 });

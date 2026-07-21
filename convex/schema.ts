@@ -10,6 +10,8 @@ export default defineSchema({
     tags: v.string(),
     year: v.string(),
     link: v.optional(v.string()),
+    slug: v.optional(v.string()),
+    caseStudy: v.optional(v.string()),
     isFeatured: v.optional(v.boolean()),
     // Optional during the migration window. Missing means published.
     isPublished: v.optional(v.boolean()),
@@ -19,7 +21,8 @@ export default defineSchema({
     .index("by_isPublished_and_isFeatured", [
       "isPublished",
       "isFeatured",
-    ]),
+    ])
+    .index("by_slug", ["slug"]),
   profile: defineTable({
     bio: v.string(),
     tagline: v.string(),
