@@ -6,6 +6,8 @@ import { storageMatchesMedia } from "./lib/media";
 
 const X_HOSTS = new Set(["x.com", "www.x.com", "twitter.com", "www.twitter.com"]);
 const INSTAGRAM_HOSTS = new Set(["instagram.com", "www.instagram.com"]);
+const LINKEDIN_HOSTS = new Set(["linkedin.com", "www.linkedin.com"]);
+const GITHUB_HOSTS = new Set(["github.com", "www.github.com"]);
 
 function validateSocialUrl(
   value: string | undefined,
@@ -108,6 +110,8 @@ export const update = mutation({
     currentFocus: v.optional(v.string()),
     xUrl: v.optional(v.string()),
     instagramUrl: v.optional(v.string()),
+    linkedinUrl: v.optional(v.string()),
+    githubUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
@@ -146,6 +150,20 @@ export const update = mutation({
         args.instagramUrl,
         "Instagram URL",
         INSTAGRAM_HOSTS,
+      );
+    }
+    if (args.linkedinUrl !== undefined) {
+      updates.linkedinUrl = validateSocialUrl(
+        args.linkedinUrl,
+        "LinkedIn URL",
+        LINKEDIN_HOSTS,
+      );
+    }
+    if (args.githubUrl !== undefined) {
+      updates.githubUrl = validateSocialUrl(
+        args.githubUrl,
+        "GitHub URL",
+        GITHUB_HOSTS,
       );
     }
     const profile = await ctx.db.query("profile").unique();

@@ -30,6 +30,8 @@ export default defineSchema({
     currentFocus: v.optional(v.string()),
     xUrl: v.optional(v.string()),
     instagramUrl: v.optional(v.string()),
+    linkedinUrl: v.optional(v.string()),
+    githubUrl: v.optional(v.string()),
     updatedAt: v.optional(v.number()),
   }),
   media: defineTable({

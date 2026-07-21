@@ -85,6 +85,16 @@ export default function ProfilePanel({ profile }: ProfilePanelProps) {
             value={profile?.instagramUrl ?? ""}
             onSave={(instagramUrl) => updateProfile({ instagramUrl })}
           />
+          <ProfileField
+            label="LinkedIn Profile URL"
+            value={profile?.linkedinUrl ?? ""}
+            onSave={(linkedinUrl) => updateProfile({ linkedinUrl })}
+          />
+          <ProfileField
+            label="GitHub Profile URL"
+            value={profile?.githubUrl ?? ""}
+            onSave={(githubUrl) => updateProfile({ githubUrl })}
+          />
         </div>
       </div>
     </Panel>
