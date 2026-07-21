@@ -3,6 +3,7 @@ import { api } from "../../../convex/_generated/api";
 import { getSiteSettings } from "@/lib/site-settings.server";
 import { getProfile } from "@/lib/profile.server";
 import { SITE_URL } from "@/lib/site-url";
+import { socialLinks } from "@/lib/social-links";
 
 export const revalidate = 3600;
 
@@ -48,14 +49,8 @@ export async function GET() {
     // Convex unreachable — section stays empty.
   }
 
-  const socials = [
-    profile?.linkedinUrl,
-    profile?.githubUrl,
-    profile?.xUrl,
-    profile?.instagramUrl,
-  ]
-    .filter((url): url is string => Boolean(url))
-    .map((url) => `- ${url}`)
+  const socials = socialLinks(profile)
+    .map((social) => `- ${social.href}`)
     .join("\n");
 
   const body = `# ${settings.siteName}

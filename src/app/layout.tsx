@@ -5,6 +5,7 @@ import { getSiteSettings } from "@/lib/site-settings.server";
 import { getProfile } from "@/lib/profile.server";
 import { SITE_URL } from "@/lib/site-url";
 import { personSchema, webSiteSchema } from "@/lib/structured-data";
+import { socialLinks } from "@/lib/social-links";
 import "./globals.css";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -88,12 +89,7 @@ export default async function RootLayout({
     getSiteSettings(),
     getProfile(),
   ]);
-  const sameAs = [
-    profile?.linkedinUrl,
-    profile?.githubUrl,
-    profile?.xUrl,
-    profile?.instagramUrl,
-  ].filter((url): url is string => Boolean(url));
+  const sameAs = socialLinks(profile).map((social) => social.href);
   const jsonLd = [
     personSchema(siteSettings, sameAs, profile?.avatarUrl ?? undefined),
     webSiteSchema(siteSettings),

@@ -6,6 +6,7 @@ import { Eyebrow, PageHeader } from "@/components/ui";
 import { getProfile } from "@/lib/profile.server";
 import { getSiteSettings } from "@/lib/site-settings.server";
 import { SITE_URL } from "@/lib/site-url";
+import { socialLinks } from "@/lib/social-links";
 
 const description =
   "Tentang Andrie Wijaya — product thinker & problem solver dari Pontianak yang merancang solusi digital dari masalah dunia nyata. Teknologi adalah alat; problem solving adalah identitas.";
@@ -33,12 +34,7 @@ export default async function AboutPage() {
     getSiteSettings(),
   ]);
 
-  const socials = [
-    profile?.xUrl ? { label: "X (Twitter)", href: profile.xUrl } : null,
-    profile?.instagramUrl
-      ? { label: "Instagram", href: profile.instagramUrl }
-      : null,
-  ].filter((s): s is { label: string; href: string } => s !== null);
+  const socials = socialLinks(profile);
 
   const jsonLd = {
     "@context": "https://schema.org",

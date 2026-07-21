@@ -1,12 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { useMutation } from "convex/react";
-import { User } from "lucide-react";
+import { Check, Edit2, User, X } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
 import EditableText from "@/components/EditableText";
 import ProfileImageEditor from "@/components/mission-control/ProfileImageEditor";
-import { Eyebrow, Panel, Skeleton } from "@/components/ui";
+import { Eyebrow, FeedbackNote, Panel, Skeleton } from "@/components/ui";
+import { getErrorMessage } from "@/lib/errors";
+import {
+  SOCIAL_PLATFORMS,
+  type SocialPlatformKey,
+} from "@/lib/social-links";
 
 interface ProfilePanelProps {
   profile: FunctionReturnType<typeof api.profile.get> | undefined;
@@ -75,29 +81,142 @@ export default function ProfilePanel({ profile }: ProfilePanelProps) {
             value={profile?.currentFocus ?? ""}
             onSave={(currentFocus) => updateProfile({ currentFocus })}
           />
-          <ProfileField
-            label="X Profile URL"
-            value={profile?.xUrl ?? ""}
-            onSave={(xUrl) => updateProfile({ xUrl })}
-          />
-          <ProfileField
-            label="Instagram Profile URL"
-            value={profile?.instagramUrl ?? ""}
-            onSave={(instagramUrl) => updateProfile({ instagramUrl })}
-          />
-          <ProfileField
-            label="LinkedIn Profile URL"
-            value={profile?.linkedinUrl ?? ""}
-            onSave={(linkedinUrl) => updateProfile({ linkedinUrl })}
-          />
-          <ProfileField
-            label="GitHub Profile URL"
-            value={profile?.githubUrl ?? ""}
-            onSave={(githubUrl) => updateProfile({ githubUrl })}
-          />
+        </div>
+
+        <div>
+          <Eyebrow as="div" className="mb-2">
+            Social Links
+          </Eyebrow>
+          <div className="space-y-2">
+            {SOCIAL_PLATFORMS.map((platform) => (
+              <SocialLinkField
+                key={platform.key}
+                label={platform.label}
+                value={profile?.[platform.key] ?? ""}
+                onSave={(url) =>
+                  updateProfile({ [platform.key]: url } as Partial<
+                    Record<SocialPlatformKey, string>
+                  >)
+                }
+              />
+            ))}
+          </div>
         </div>
       </div>
     </Panel>
+  );
+}
+
+function SocialLinkField({
+  label,
+  value,
+  onSave,
+}: {
+  label: string;
+  value: string;
+  onSave: (value: string) => Promise<unknown>;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const startEditing = () => {
+    setError(null);
+    setDraft(value);
+    setIsEditing(true);
+  };
+
+  const handleSave = async () => {
+    setError(null);
+    setIsSaving(true);
+    try {
+      await onSave(draft.trim());
+      setIsEditing(false);
+    } catch (saveError) {
+      setError(
+        getErrorMessage(saveError, `Failed to save ${label}. Please try again.`),
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <div className="border border-ink rounded-sm p-3 space-y-2 animate-fade-in-up">
+        <label
+          htmlFor={`social-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+          className="font-mono text-[10px] uppercase tracking-widest text-ink-muted"
+        >
+          {label}
+        </label>
+        <input
+          id={`social-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+          type="url"
+          disabled={isSaving}
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          className="w-full border-b border-ink py-1 font-mono text-xs outline-none bg-transparent"
+          placeholder={`https://... (empty removes ${label})`}
+          autoFocus
+        />
+        {error && <FeedbackNote tone="error">{error}</FeedbackNote>}
+        <div className="flex gap-2 justify-end">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="p-1.5 bg-ink text-paper hover:bg-ink-secondary disabled:bg-ink-faint transition-colors rounded-sm"
+            title={`Save ${label}`}
+          >
+            <Check size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsEditing(false)}
+            disabled={isSaving}
+            className="p-1.5 border border-line-strong hover:bg-surface transition-colors rounded-sm"
+            title="Cancel"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-3 border border-line rounded-sm px-3 py-2">
+      <div className="min-w-0">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+          {label}
+        </div>
+        {value ? (
+          <a
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block truncate font-mono text-xs text-ink-secondary hover:text-accent transition-colors"
+            title={value}
+          >
+            {value}
+          </a>
+        ) : (
+          <span className="font-mono text-xs text-ink-faint italic">
+            Not set
+          </span>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={startEditing}
+        className="shrink-0 p-1.5 text-ink-muted hover:text-ink border border-transparent hover:border-line rounded-sm transition-colors"
+        title={`Edit ${label}`}
+      >
+        <Edit2 size={14} />
+      </button>
+    </div>
   );
 }
 

@@ -6,6 +6,7 @@ import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "../../convex/_generated/api";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
+import { socialLinks } from "@/lib/social-links";
 
 export default function Hero({
   profile,
@@ -44,28 +45,18 @@ export default function Hero({
           </h1>
           {/* Ikon Media Sosial */}
           <div className="flex gap-4">
-            {profile?.xUrl && (
+            {socialLinks(profile).map((social) => (
               <a
-                href={profile.xUrl}
+                key={social.key}
+                href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`${settings.siteName} on X`}
+                aria-label={`${settings.siteName} on ${social.label}`}
                 className="bg-ink text-paper p-2 rounded-full w-10 h-10 flex items-center justify-center text-xs font-semibold hover:bg-ink-secondary transition-colors"
               >
-                X
+                {social.short}
               </a>
-            )}
-            {profile?.instagramUrl && (
-              <a
-                href={profile.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${settings.siteName} on Instagram`}
-                className="bg-ink text-paper p-2 rounded-full w-10 h-10 flex items-center justify-center text-xs font-semibold hover:bg-ink-secondary transition-colors"
-              >
-                IG
-              </a>
-            )}
+            ))}
           </div>
         </div>
         <div className="text-lg text-ink-secondary mt-6 leading-relaxed max-w-2xl">

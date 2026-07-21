@@ -184,7 +184,7 @@ export default function EditableText({
 
   return (
     <div className="group relative">
-      <div className="prose max-w-none pr-20 prose-p:leading-relaxed prose-p:text-ink-secondary prose-strong:text-ink prose-p:mb-4">
+      <div className="prose max-w-none pr-20 break-words prose-p:leading-relaxed prose-p:text-ink-secondary prose-strong:text-ink prose-p:mb-4">
         {value ? (
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>
         ) : (
@@ -193,7 +193,7 @@ export default function EditableText({
             onClick={startEditing}
             className="text-left text-ink-faint italic hover:text-ink transition-colors"
           >
-            No content set for {label}. Click to edit.
+            Not set — click to edit.
           </button>
         )}
       </div>
