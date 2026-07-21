@@ -88,9 +88,12 @@ export default async function RootLayout({
     getSiteSettings(),
     getProfile(),
   ]);
-  const sameAs = [profile?.xUrl, profile?.instagramUrl].filter(
-    (url): url is string => Boolean(url),
-  );
+  const sameAs = [
+    profile?.linkedinUrl,
+    profile?.githubUrl,
+    profile?.xUrl,
+    profile?.instagramUrl,
+  ].filter((url): url is string => Boolean(url));
   const jsonLd = [
     personSchema(siteSettings, sameAs, profile?.avatarUrl ?? undefined),
     webSiteSchema(siteSettings),

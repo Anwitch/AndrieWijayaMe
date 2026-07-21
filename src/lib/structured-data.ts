@@ -17,10 +17,27 @@ export function personSchema(
     "@type": "Person",
     "@id": `${SITE_URL}/#person`,
     name: settings.siteName,
+    alternateName: "Anwitch",
     url: SITE_URL,
     image,
+    email: "mailto:andrie.wijaya.contact@gmail.com",
     jobTitle: "Product Thinker & Problem Solver",
     description: settings.seoDescription,
+    nationality: { "@type": "Country", name: "Indonesia" },
+    alumniOf: {
+      "@type": "EducationalOrganization",
+      name: "Universitas Tanjungpura",
+      sameAs: "https://untan.ac.id",
+    },
+    affiliation: {
+      "@type": "Organization",
+      name: "HMIF FT UNTAN",
+    },
+    hasOccupation: {
+      "@type": "Occupation",
+      name: "Product Thinker & Problem Solver",
+      occupationLocation: { "@type": "City", name: "Pontianak" },
+    },
     knowsAbout: [
       "Problem Solving",
       "Product Thinking",
