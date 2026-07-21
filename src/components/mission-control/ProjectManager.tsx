@@ -37,6 +37,8 @@ const emptyProjectForm = {
   year: "",
   tags: "",
   link: "",
+  slug: "",
+  caseStudy: "",
 };
 
 const editInputClass =
@@ -66,6 +68,8 @@ export default function ProjectManager({
       year: project.year,
       tags: project.tags,
       link: project.link ?? "",
+      slug: project.slug ?? "",
+      caseStudy: project.caseStudy ?? "",
     });
   };
 
@@ -114,6 +118,8 @@ export default function ProjectManager({
           year: editFormData.year.trim(),
           tags: editFormData.tags.trim(),
           link: editFormData.link.trim(),
+          slug: editFormData.slug.trim(),
+          caseStudy: editFormData.caseStudy.trim(),
         }),
       () => setEditingProjectId(null),
     );
@@ -228,6 +234,32 @@ export default function ProjectManager({
                             }
                             className={`${editInputClass} text-xs font-mono`}
                             placeholder="https://example.com"
+                          />
+                          <input
+                            aria-label="Project slug"
+                            value={editFormData.slug}
+                            disabled={isSaving}
+                            onChange={(event) =>
+                              setEditFormData({
+                                ...editFormData,
+                                slug: event.target.value,
+                              })
+                            }
+                            className={`${editInputClass} text-xs font-mono`}
+                            placeholder="slug-halaman-detail"
+                          />
+                          <textarea
+                            aria-label="Project case study"
+                            value={editFormData.caseStudy}
+                            disabled={isSaving}
+                            onChange={(event) =>
+                              setEditFormData({
+                                ...editFormData,
+                                caseStudy: event.target.value,
+                              })
+                            }
+                            className={`${editInputClass} text-xs min-h-[120px] font-mono`}
+                            placeholder="Case study (Markdown)"
                           />
                         </td>
                         <td className="py-4 align-top">

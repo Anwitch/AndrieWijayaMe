@@ -19,6 +19,8 @@ export default function AddProjectForm() {
   const [tags, setTags] = useState("");
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [link, setLink] = useState("");
+  const [slug, setSlug] = useState("");
+  const [caseStudy, setCaseStudy] = useState("");
   const [isPublished, setIsPublished] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +45,8 @@ export default function AddProjectForm() {
         tags: tags.trim(),
         year: year.trim(),
         link: link.trim() || undefined,
+        slug: slug.trim() || undefined,
+        caseStudy: caseStudy.trim() || undefined,
         isPublished,
       });
       setTitle("");
@@ -50,6 +54,8 @@ export default function AddProjectForm() {
       setTags("");
       setYear(new Date().getFullYear().toString());
       setLink("");
+      setSlug("");
+      setCaseStudy("");
       setIsPublished(true);
       setIsOpen(false);
     } catch (submitError) {
@@ -176,6 +182,34 @@ export default function AddProjectForm() {
             onChange={(e) => setLink(e.target.value)}
             className={inputUnderlineClass}
             placeholder="https://..."
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="project-slug" className={labelClass}>
+            Slug (Optional — enables case study page)
+          </label>
+          <input
+            id="project-slug"
+            disabled={isSubmitting}
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            className={inputUnderlineClass}
+            placeholder="e.g. kedut-kemana-duitku"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="project-case-study" className={labelClass}>
+            Case Study (Markdown, Optional)
+          </label>
+          <textarea
+            id="project-case-study"
+            disabled={isSubmitting}
+            value={caseStudy}
+            onChange={(e) => setCaseStudy(e.target.value)}
+            className={`${inputUnderlineClass} min-h-[160px] resize-y font-mono text-xs`}
+            placeholder="## Masalah&#10;...&#10;&#10;## Yang Saya Rancang&#10;..."
           />
         </div>
 
