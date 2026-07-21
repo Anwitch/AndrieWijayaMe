@@ -117,6 +117,14 @@ export default function ProjectsArchive() {
                       <div className="text-base text-ink-secondary mt-4 max-w-xl leading-relaxed">
                         {project.description}
                       </div>
+                      {project.slug && (
+                        <Link
+                          href={`/projects/${project.slug}`}
+                          className="inline-flex items-center gap-2 mt-4 font-mono text-xs uppercase tracking-widest text-ink-muted hover:text-accent transition-colors"
+                        >
+                          Studi Kasus →
+                        </Link>
+                      )}
                     </td>
                     <td className="py-8 px-8 align-top hidden md:table-cell">
                       <Eyebrow className="whitespace-nowrap overflow-hidden text-ellipsis block">

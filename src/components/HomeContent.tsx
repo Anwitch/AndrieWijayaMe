@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Hero from "@/components/Hero";
 import MetadataStrip from "@/components/MetadataStrip";
 import PublicShell from "@/components/PublicShell";
@@ -126,6 +127,7 @@ export default function HomeContent({
                       year={project.year}
                       tags={project.tags}
                       link={project.link}
+                      slug={project.slug}
                     />
                   ))
                 )}
@@ -155,15 +157,20 @@ function ProjectCardNASA({
   year,
   tags,
   link,
+  slug,
 }: {
   title: string;
   description: string;
   year: string;
   tags: string;
   link?: string;
+  slug?: string;
 }) {
+  const hasTarget = Boolean(slug || link);
   const CardContent = (
-    <div className="border-b border-line pb-8 group cursor-pointer hover:bg-surface transition-colors px-4 -mx-4 h-full">
+    <div
+      className={`border-b border-line pb-8 group hover:bg-surface transition-colors px-4 -mx-4 h-full ${hasTarget ? "cursor-pointer" : ""}`}
+    >
       <Eyebrow>{tags}</Eyebrow>
       <h3 className="text-2xl font-semibold mt-2 group-hover:text-accent transition-colors flex items-baseline justify-between gap-4">
         <span>{title}</span>
@@ -174,16 +181,24 @@ function ProjectCardNASA({
       <p className="mt-3 text-lg leading-relaxed text-ink-secondary line-clamp-2">
         {description}
       </p>
-      {link && (
+      {hasTarget && (
         <Eyebrow
           as="div"
           className="mt-4 group-hover:text-ink transition-colors"
         >
-          View Mission →
+          {slug ? "Studi Kasus →" : "View Mission →"}
         </Eyebrow>
       )}
     </div>
   );
+
+  if (slug) {
+    return (
+      <Link href={`/projects/${slug}`} className="block no-underline">
+        {CardContent}
+      </Link>
+    );
+  }
 
   if (link) {
     return (
