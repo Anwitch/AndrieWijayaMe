@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import PublicShell from "@/components/PublicShell";
 import {
   Button,
@@ -101,9 +102,18 @@ export default function ProjectsArchive() {
                       {project.year}
                     </td>
                     <td className="py-8 align-top">
-                      <div className="font-semibold text-lg text-ink group-hover:text-accent transition-colors leading-none">
-                        {project.title}
-                      </div>
+                      {project.slug ? (
+                        <Link
+                          href={`/projects/${project.slug}`}
+                          className="font-semibold text-lg text-ink group-hover:text-accent transition-colors leading-none"
+                        >
+                          {project.title}
+                        </Link>
+                      ) : (
+                        <div className="font-semibold text-lg text-ink group-hover:text-accent transition-colors leading-none">
+                          {project.title}
+                        </div>
+                      )}
                       <div className="text-base text-ink-secondary mt-4 max-w-xl leading-relaxed">
                         {project.description}
                       </div>

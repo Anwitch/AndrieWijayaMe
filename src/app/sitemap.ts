@@ -27,5 +27,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // If Convex is unreachable at build/request time, still return static routes.
   }
 
-  return [...staticRoutes, ...posts];
+  let projects: MetadataRoute.Sitemap = [];
+  try {
+    const result = await fetchQuery(api.projects.listPublished, {
+      paginationOpts: { numItems: 500, cursor: null },
+    });
+    projects = result.page
+      .filter(
+        (project): project is NonNullable<typeof project> =>
+          project !== null && Boolean(project.slug),
+      )
+      .map((project) => ({
+        url: `${SITE_URL}/projects/${project.slug}`,
+        lastModified: new Date(project.updatedAt ?? project.createdAt),
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      }));
+  } catch {
+    // Convex unreachable — static routes still returned.
+  }
+
+  return [...staticRoutes, ...posts, ...projects];
 }
