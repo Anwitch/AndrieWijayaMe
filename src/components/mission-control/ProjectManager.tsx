@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import { useMutation } from "convex/react";
 import {
   Check,
+  ChevronDown,
+  ChevronUp,
   Edit2,
   ExternalLink,
   Eye,
@@ -51,6 +53,7 @@ export default function ProjectManager({
 }: ProjectManagerProps) {
   const removeProject = useMutation(api.projects.removeProject);
   const updateProject = useMutation(api.projects.updateProject);
+  const moveProject = useMutation(api.projects.moveProject);
   const [editingProjectId, setEditingProjectId] =
     useState<Id<"projects"> | null>(null);
   const [editFormData, setEditFormData] = useState(emptyProjectForm);
@@ -125,6 +128,12 @@ export default function ProjectManager({
     );
   };
 
+  const move = (project: Doc<"projects">, direction: "up" | "down") => {
+    void runAction(`move-${project._id}`, () =>
+      moveProject({ id: project._id, direction }),
+    );
+  };
+
   const deleteProject = (project: Doc<"projects">) => {
     if (!window.confirm(`Delete "${project.title}" permanently?`)) return;
     void runAction(`delete-${project._id}`, () =>
@@ -155,21 +164,27 @@ export default function ProjectManager({
         <EmptyState>No projects found in database.</EmptyState>
       ) : (
         <div className="overflow-x-auto">
+          <p className="mb-4 font-mono text-xs uppercase tracking-widest text-ink-faint">
+            This order drives the homepage and the public archive
+          </p>
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-line font-mono text-xs uppercase tracking-widest text-ink-muted">
                 <th className="pb-4 font-normal w-24">Year</th>
                 <th className="pb-4 font-normal">Mission Details</th>
                 <th className="pb-4 font-normal w-32">Tags</th>
-                <th className="pb-4 font-normal text-right w-32">Actions</th>
+                <th className="pb-4 font-normal text-right w-40">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {projects.map((project) => {
+              {projects.map((project, index) => {
                 const isEditing = editingProjectId === project._id;
                 const isSaving = pendingAction === `save-${project._id}`;
                 const isDeleting = pendingAction === `delete-${project._id}`;
                 const isPublished = project.isPublished !== false;
+                const isFirst = index === 0;
+                const isLast =
+                  index === projects.length - 1 && status === "Exhausted";
 
                 return (
                   <tr
@@ -368,36 +383,58 @@ export default function ProjectManager({
                           </span>
                         </td>
                         <td className="py-4 text-right align-top">
-                          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                            <button
-                              type="button"
-                              onClick={() => startEditing(project)}
-                              disabled={pendingAction !== null}
-                              className="p-2 text-ink-muted hover:text-ink hover:bg-paper rounded-sm shadow-sm border border-transparent hover:border-line transition-all"
-                              title="Edit project"
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                            {project.link && (
-                              <a
-                                href={project.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-2 text-ink-muted hover:text-ink hover:bg-paper rounded-sm shadow-sm border border-transparent hover:border-line transition-all"
-                                title="Open project"
+                          <div className="flex justify-end items-start gap-2">
+                            <div className="flex gap-1">
+                              <button
+                                type="button"
+                                onClick={() => move(project, "up")}
+                                disabled={pendingAction !== null || isFirst}
+                                className="p-2 text-ink-muted hover:text-ink hover:bg-paper disabled:text-ink-faint disabled:hover:bg-transparent rounded-sm border border-transparent hover:border-line transition-all"
+                                title="Move project up"
                               >
-                                <ExternalLink size={16} />
-                              </a>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => deleteProject(project)}
-                              disabled={pendingAction !== null || isDeleting}
-                              className="p-2 text-danger/50 hover:text-danger hover:bg-paper disabled:opacity-40 rounded-sm shadow-sm border border-transparent hover:border-danger-line transition-all"
-                              title="Delete project"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                                <ChevronUp size={16} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => move(project, "down")}
+                                disabled={pendingAction !== null || isLast}
+                                className="p-2 text-ink-muted hover:text-ink hover:bg-paper disabled:text-ink-faint disabled:hover:bg-transparent rounded-sm border border-transparent hover:border-line transition-all"
+                                title="Move project down"
+                              >
+                                <ChevronDown size={16} />
+                              </button>
+                            </div>
+                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                              <button
+                                type="button"
+                                onClick={() => startEditing(project)}
+                                disabled={pendingAction !== null}
+                                className="p-2 text-ink-muted hover:text-ink hover:bg-paper rounded-sm shadow-sm border border-transparent hover:border-line transition-all"
+                                title="Edit project"
+                              >
+                                <Edit2 size={16} />
+                              </button>
+                              {project.link && (
+                                <a
+                                  href={project.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-2 text-ink-muted hover:text-ink hover:bg-paper rounded-sm shadow-sm border border-transparent hover:border-line transition-all"
+                                  title="Open project"
+                                >
+                                  <ExternalLink size={16} />
+                                </a>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => deleteProject(project)}
+                                disabled={pendingAction !== null || isDeleting}
+                                className="p-2 text-danger/50 hover:text-danger hover:bg-paper disabled:opacity-40 rounded-sm shadow-sm border border-transparent hover:border-danger-line transition-all"
+                                title="Delete project"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           </div>
                         </td>
                       </>

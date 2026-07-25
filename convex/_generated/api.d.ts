@@ -18,6 +18,7 @@ import type * as media from "../media.js";
 import type * as posts from "../posts.js";
 import type * as profile from "../profile.js";
 import type * as projects from "../projects.js";
+import type * as seedEntity from "../seedEntity.js";
 import type * as siteSettings from "../siteSettings.js";
 
 import type {
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   posts: typeof posts;
   profile: typeof profile;
   projects: typeof projects;
+  seedEntity: typeof seedEntity;
   siteSettings: typeof siteSettings;
 }>;
 

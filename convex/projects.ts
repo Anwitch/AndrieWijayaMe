@@ -11,8 +11,23 @@ import {
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 
-function newestFirst<T extends { _creationTime: number }>(rows: T[]) {
-  return rows.sort((a, b) => b._creationTime - a._creationTime);
+// Upper bound for the one-time backfill pass that gives every project an
+// explicit sortOrder. Steady-state reordering only touches two documents.
+const MAX_ORDERABLE_PROJECTS = 200;
+
+// Mirrors how the `by_sortOrder` index reads in descending order: rows with an
+// explicit sortOrder come first (highest wins), legacy rows follow newest-first.
+function manualOrderFirst<
+  T extends { sortOrder?: number; _creationTime: number },
+>(rows: T[]) {
+  return rows.sort((a, b) => {
+    if (a.sortOrder !== undefined && b.sortOrder !== undefined) {
+      return b.sortOrder - a.sortOrder || b._creationTime - a._creationTime;
+    }
+    if (a.sortOrder !== undefined) return -1;
+    if (b.sortOrder !== undefined) return 1;
+    return b._creationTime - a._creationTime;
+  });
 }
 
 function safePublicLink(value: string | undefined) {
@@ -48,11 +63,38 @@ async function assertSlugAvailable(
   }
 }
 
+// Assigns every project an explicit sortOrder, preserving the order they are
+// already displayed in. Runs once, the first time an admin reorders anything.
+async function backfillSortOrder(ctx: MutationCtx) {
+  const ordered = await ctx.db
+    .query("projects")
+    .withIndex("by_sortOrder")
+    .order("desc")
+    .take(MAX_ORDERABLE_PROJECTS);
+
+  for (const [index, project] of ordered.entries()) {
+    const sortOrder = ordered.length - index;
+    if (project.sortOrder !== sortOrder) {
+      await ctx.db.patch(project._id, { sortOrder });
+    }
+  }
+}
+
+async function nextSortOrder(ctx: MutationCtx) {
+  const [highest] = await ctx.db
+    .query("projects")
+    .withIndex("by_sortOrder")
+    .order("desc")
+    .take(1);
+  return (highest?.sortOrder ?? 0) + 1;
+}
+
 export const listPublished = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
     const result = await ctx.db
       .query("projects")
+      .withIndex("by_sortOrder")
       .order("desc")
       .paginate(args.paginationOpts);
 
@@ -73,6 +115,7 @@ export const listAll = query({
     await requireAdmin(ctx);
     return await ctx.db
       .query("projects")
+      .withIndex("by_sortOrder")
       .order("desc")
       .paginate(args.paginationOpts);
   },
@@ -84,14 +127,14 @@ export const getFeaturedProjects = query({
     const [published, legacy] = await Promise.all([
       ctx.db
         .query("projects")
-        .withIndex("by_isPublished_and_isFeatured", (q) =>
+        .withIndex("by_isPublished_and_isFeatured_and_sortOrder", (q) =>
           q.eq("isPublished", true).eq("isFeatured", true),
         )
         .order("desc")
         .take(6),
       ctx.db
         .query("projects")
-        .withIndex("by_isPublished_and_isFeatured", (q) =>
+        .withIndex("by_isPublished_and_isFeatured_and_sortOrder", (q) =>
           q.eq("isPublished", undefined).eq("isFeatured", true),
         )
         .order("desc")
@@ -99,7 +142,7 @@ export const getFeaturedProjects = query({
     ]);
 
     return sanitizePublicProjects(
-      newestFirst([...published, ...legacy]).slice(0, 6),
+      manualOrderFirst([...published, ...legacy]).slice(0, 6),
     );
   },
 });
@@ -141,9 +184,53 @@ export const addProject = mutation({
           : undefined,
       isFeatured: args.isFeatured ?? false,
       isPublished: args.isPublished ?? true,
+      sortOrder: await nextSortOrder(ctx),
       createdAt: now,
       updatedAt: now,
     });
+  },
+});
+
+export const moveProject = mutation({
+  args: {
+    id: v.id("projects"),
+    direction: v.union(v.literal("up"), v.literal("down")),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const [unordered] = await ctx.db
+      .query("projects")
+      .withIndex("by_sortOrder", (q) => q.eq("sortOrder", undefined))
+      .take(1);
+    if (unordered) {
+      await backfillSortOrder(ctx);
+    }
+
+    const project = await ctx.db.get(args.id);
+    if (!project || project.sortOrder === undefined) {
+      throw new ConvexError("Project not found.");
+    }
+    const sortOrder = project.sortOrder;
+
+    // Higher sortOrder sits closer to the top, so "up" means the next larger value.
+    const [neighbour] =
+      args.direction === "up"
+        ? await ctx.db
+            .query("projects")
+            .withIndex("by_sortOrder", (q) => q.gt("sortOrder", sortOrder))
+            .order("asc")
+            .take(1)
+        : await ctx.db
+            .query("projects")
+            .withIndex("by_sortOrder", (q) => q.lt("sortOrder", sortOrder))
+            .order("desc")
+            .take(1);
+    if (!neighbour) return null;
+
+    await ctx.db.patch(project._id, { sortOrder: neighbour.sortOrder });
+    await ctx.db.patch(neighbour._id, { sortOrder });
+    return null;
   },
 });
 

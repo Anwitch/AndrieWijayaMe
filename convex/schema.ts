@@ -15,13 +15,18 @@ export default defineSchema({
     isFeatured: v.optional(v.boolean()),
     // Optional during the migration window. Missing means published.
     isPublished: v.optional(v.boolean()),
+    // Manual display order. Higher sorts first. Missing on legacy rows, which
+    // fall back to newest-first because undefined sorts last in descending order.
+    sortOrder: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.optional(v.number()),
   })
-    .index("by_isPublished_and_isFeatured", [
+    .index("by_isPublished_and_isFeatured_and_sortOrder", [
       "isPublished",
       "isFeatured",
+      "sortOrder",
     ])
+    .index("by_sortOrder", ["sortOrder"])
     .index("by_slug", ["slug"]),
   profile: defineTable({
     bio: v.string(),
