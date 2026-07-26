@@ -108,6 +108,18 @@ export const update = mutation({
     status: v.optional(v.string()),
     specialization: v.optional(v.string()),
     currentFocus: v.optional(v.string()),
+    educationTitle: v.optional(v.string()),
+    educationPeriod: v.optional(v.string()),
+    educationDescription: v.optional(v.string()),
+    educationFocus: v.optional(v.string()),
+    educationMethod: v.optional(v.string()),
+    educationLocation: v.optional(v.string()),
+    experienceTitle: v.optional(v.string()),
+    experiencePeriod: v.optional(v.string()),
+    experienceDescription: v.optional(v.string()),
+    experienceRole: v.optional(v.string()),
+    experienceCapabilities: v.optional(v.string()),
+    experienceBase: v.optional(v.string()),
     xUrl: v.optional(v.string()),
     instagramUrl: v.optional(v.string()),
     linkedinUrl: v.optional(v.string()),
@@ -141,6 +153,42 @@ export const update = mutation({
         "Current focus",
         300,
       );
+    }
+    if (args.educationTitle !== undefined) {
+      updates.educationTitle = limitedText(args.educationTitle, "Education title", 300);
+    }
+    if (args.educationPeriod !== undefined) {
+      updates.educationPeriod = limitedText(args.educationPeriod, "Education period", 160);
+    }
+    if (args.educationDescription !== undefined) {
+      updates.educationDescription = limitedText(args.educationDescription, "Education description", 2000);
+    }
+    if (args.educationFocus !== undefined) {
+      updates.educationFocus = limitedText(args.educationFocus, "Education focus", 300);
+    }
+    if (args.educationMethod !== undefined) {
+      updates.educationMethod = limitedText(args.educationMethod, "Education method", 300);
+    }
+    if (args.educationLocation !== undefined) {
+      updates.educationLocation = limitedText(args.educationLocation, "Education location", 300);
+    }
+    if (args.experienceTitle !== undefined) {
+      updates.experienceTitle = limitedText(args.experienceTitle, "Experience title", 300);
+    }
+    if (args.experiencePeriod !== undefined) {
+      updates.experiencePeriod = limitedText(args.experiencePeriod, "Experience period", 160);
+    }
+    if (args.experienceDescription !== undefined) {
+      updates.experienceDescription = limitedText(args.experienceDescription, "Experience description", 2000);
+    }
+    if (args.experienceRole !== undefined) {
+      updates.experienceRole = limitedText(args.experienceRole, "Experience role", 300);
+    }
+    if (args.experienceCapabilities !== undefined) {
+      updates.experienceCapabilities = limitedText(args.experienceCapabilities, "Experience capabilities", 300);
+    }
+    if (args.experienceBase !== undefined) {
+      updates.experienceBase = limitedText(args.experienceBase, "Experience base", 300);
     }
     if (args.xUrl !== undefined) {
       updates.xUrl = validateSocialUrl(args.xUrl, "X URL", X_HOSTS);

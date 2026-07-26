@@ -83,6 +83,108 @@ export default function ProfilePanel({ profile }: ProfilePanelProps) {
           />
         </div>
 
+        <div className="border-t border-line pt-6">
+          <Eyebrow as="div" className="mb-4 font-semibold text-ink">
+            Education Section
+          </Eyebrow>
+          <div className="grid grid-cols-1 gap-4">
+            <ProfileField
+              label="Education Title"
+              value={profile?.educationTitle ?? ""}
+              onSave={(educationTitle) => updateProfile({ educationTitle })}
+            />
+            <ProfileField
+              label="Education Period"
+              value={profile?.educationPeriod ?? ""}
+              onSave={(educationPeriod) => updateProfile({ educationPeriod })}
+            />
+            <div>
+              <Eyebrow as="div" className="mb-1">
+                Education Description
+              </Eyebrow>
+              <div className="text-sm bg-surface p-4 border border-dashed border-line rounded-sm italic">
+                <EditableText
+                  label="Education Description"
+                  multiline
+                  value={profile?.educationDescription ?? ""}
+                  onSave={(educationDescription) =>
+                    updateProfile({ educationDescription })
+                  }
+                />
+              </div>
+            </div>
+            <ProfileField
+              label="Education Focus"
+              value={profile?.educationFocus ?? ""}
+              onSave={(educationFocus) => updateProfile({ educationFocus })}
+            />
+            <ProfileField
+              label="Education Method"
+              value={profile?.educationMethod ?? ""}
+              onSave={(educationMethod) => updateProfile({ educationMethod })}
+            />
+            <ProfileField
+              label="Education Location"
+              value={profile?.educationLocation ?? ""}
+              onSave={(educationLocation) =>
+                updateProfile({ educationLocation })
+              }
+            />
+          </div>
+        </div>
+
+        <div className="border-t border-line pt-6">
+          <Eyebrow as="div" className="mb-4 font-semibold text-ink">
+            Experience Section
+          </Eyebrow>
+          <div className="grid grid-cols-1 gap-4">
+            <ProfileField
+              label="Experience Title"
+              value={profile?.experienceTitle ?? ""}
+              onSave={(experienceTitle) => updateProfile({ experienceTitle })}
+            />
+            <ProfileField
+              label="Experience Period"
+              value={profile?.experiencePeriod ?? ""}
+              onSave={(experiencePeriod) =>
+                updateProfile({ experiencePeriod })
+              }
+            />
+            <div>
+              <Eyebrow as="div" className="mb-1">
+                Experience Description
+              </Eyebrow>
+              <div className="text-sm bg-surface p-4 border border-dashed border-line rounded-sm italic">
+                <EditableText
+                  label="Experience Description"
+                  multiline
+                  value={profile?.experienceDescription ?? ""}
+                  onSave={(experienceDescription) =>
+                    updateProfile({ experienceDescription })
+                  }
+                />
+              </div>
+            </div>
+            <ProfileField
+              label="Experience Role"
+              value={profile?.experienceRole ?? ""}
+              onSave={(experienceRole) => updateProfile({ experienceRole })}
+            />
+            <ProfileField
+              label="Experience Capabilities"
+              value={profile?.experienceCapabilities ?? ""}
+              onSave={(experienceCapabilities) =>
+                updateProfile({ experienceCapabilities })
+              }
+            />
+            <ProfileField
+              label="Experience Base"
+              value={profile?.experienceBase ?? ""}
+              onSave={(experienceBase) => updateProfile({ experienceBase })}
+            />
+          </div>
+        </div>
+
         <div>
           <Eyebrow as="div" className="mb-2">
             Social Links

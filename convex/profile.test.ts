@@ -64,4 +64,20 @@ describe("profile social urls", () => {
     const profile = await t.query(api.profile.get, {});
     expect(profile?.githubUrl).toBeFalsy();
   });
+
+  test("admin can set education and experience fields", async () => {
+    const t = convexTest(schema, modules);
+    const admin = await createAdmin(t);
+    await admin.mutation(api.profile.update, {
+      educationTitle: "Informatika UNTAN",
+      educationPeriod: "2021 — 2025",
+      experienceTitle: "Senior Software Engineer",
+      experiencePeriod: "2023 — SEKARANG",
+    });
+    const profile = await t.query(api.profile.get, {});
+    expect(profile?.educationTitle).toBe("Informatika UNTAN");
+    expect(profile?.educationPeriod).toBe("2021 — 2025");
+    expect(profile?.experienceTitle).toBe("Senior Software Engineer");
+    expect(profile?.experiencePeriod).toBe("2023 — SEKARANG");
+  });
 });

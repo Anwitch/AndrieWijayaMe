@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Hero from "@/components/Hero";
 import MetadataStrip from "@/components/MetadataStrip";
@@ -18,6 +19,14 @@ import { api } from "../../convex/_generated/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+const NAV_ITEMS = [
+  { id: "ringkasan", label: "Ringkasan" },
+  { id: "proyek", label: "Proyek Pilihan" },
+  { id: "faq", label: "Tanya Jawab" },
+  { id: "pendidikan", label: "Pendidikan" },
+  { id: "pengalaman", label: "Pengalaman" },
+];
+
 export default function HomeContent({
   preloadedProfile,
 }: {
@@ -25,6 +34,37 @@ export default function HomeContent({
 }) {
   const projects = useQuery(api.projects.getFeaturedProjects);
   const profile = usePreloadedQuery(preloadedProfile);
+  const [activeId, setActiveId] = useState<string>("ringkasan");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 140;
+
+      let currentActive = NAV_ITEMS[0].id;
+      for (const item of NAV_ITEMS) {
+        const el = document.getElementById(item.id);
+        if (el) {
+          const top = el.offsetTop;
+          if (scrollPosition >= top) {
+            currentActive = item.id;
+          }
+        }
+      }
+
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 60
+      ) {
+        currentActive = NAV_ITEMS[NAV_ITEMS.length - 1].id;
+      }
+
+      setActiveId(currentActive);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <PublicShell>
@@ -44,37 +84,33 @@ export default function HomeContent({
               ISI
             </Eyebrow>
             <nav>
-              <ul className="flex flex-col gap-4 text-sm font-medium text-ink-secondary">
-                <li>
-                  <a
-                    href="#ringkasan"
-                    className="text-ink border-l-2 border-ink pl-4 font-semibold block transition-all hover:pl-5"
-                  >
-                    Ringkasan
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#proyek"
-                    className="hover:text-ink pl-4 transition-all hover:pl-5 block border-l-2 border-transparent hover:border-line"
-                  >
-                    Proyek Pilihan
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#faq"
-                    className="hover:text-ink pl-4 transition-all hover:pl-5 block border-l-2 border-transparent hover:border-line"
-                  >
-                    Tanya Jawab
-                  </a>
-                </li>
-                <li className="text-ink-faint pl-4 border-l-2 border-transparent cursor-not-allowed">
-                  Pendidikan
-                </li>
-                <li className="text-ink-faint pl-4 border-l-2 border-transparent cursor-not-allowed">
-                  Pengalaman
-                </li>
+              <ul className="flex flex-col gap-4 text-sm font-medium">
+                {NAV_ITEMS.map((item) => {
+                  const isActive = activeId === item.id;
+                  return (
+                    <li key={item.id}>
+                      <a
+                        href={`#${item.id}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setActiveId(item.id);
+                          const el = document.getElementById(item.id);
+                          if (el) {
+                            el.scrollIntoView({ behavior: "smooth" });
+                            window.history.pushState(null, "", `#${item.id}`);
+                          }
+                        }}
+                        className={`block pl-4 transition-all duration-200 border-l-2 ${
+                          isActive
+                            ? "border-ink text-ink font-semibold"
+                            : "border-transparent text-ink-secondary hover:text-ink hover:border-line"
+                        }`}
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
           </aside>
@@ -144,6 +180,93 @@ export default function HomeContent({
             </section>
 
             <FaqSection />
+
+            {/* Pendidikan */}
+            <section id="pendidikan" className="mt-24 scroll-mt-24">
+              <SectionHeading title="Pendidikan" aside="EDUCATION" />
+              <div className="border-b border-line pb-8">
+                <div className="flex flex-col md:flex-row justify-between md:items-baseline gap-2 mb-3">
+                  <h3 className="text-2xl font-semibold text-ink">
+                    {profile?.educationTitle ||
+                      "Otodidak & Pembelajaran Berkelanjutan"}
+                  </h3>
+                  <span className="font-mono text-sm text-ink-muted">
+                    {profile?.educationPeriod || "2020 — SEKARANG"}
+                  </span>
+                </div>
+                <p className="text-lg text-ink-secondary leading-relaxed max-w-prose mb-6">
+                  {profile?.educationDescription ||
+                    "Fokus mendalam pada arsitektur produk, sistem web full-stack, otomatisasi proses bisnis, dan integrasi AI agent untuk menyelesaikan masalah nyata."}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-line">
+                  <div className="flex flex-col gap-1">
+                    <Eyebrow tone="muted">BIDANG FOKUS</Eyebrow>
+                    <span className="text-base text-ink font-medium">
+                      {profile?.educationFocus ||
+                        "Product Thinking & Architecture"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Eyebrow tone="muted">METODE</Eyebrow>
+                    <span className="text-base text-ink font-medium">
+                      {profile?.educationMethod ||
+                        "Project-Driven & First-Principles"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Eyebrow tone="muted">LOKASI</Eyebrow>
+                    <span className="text-base text-ink font-medium">
+                      {profile?.educationLocation ||
+                        "Pontianak, Kalimantan Barat, ID"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Pengalaman */}
+            <section id="pengalaman" className="mt-24 scroll-mt-24">
+              <SectionHeading title="Pengalaman" aside="EXPERIENCE" />
+              <div className="space-y-12">
+                <div className="border-b border-line pb-8">
+                  <div className="flex flex-col md:flex-row justify-between md:items-baseline gap-2 mb-3">
+                    <h3 className="text-2xl font-semibold text-ink">
+                      {profile?.experienceTitle ||
+                        "Product Thinker & Problem Solver"}
+                    </h3>
+                    <span className="font-mono text-sm text-ink-muted">
+                      {profile?.experiencePeriod || "2022 — SEKARANG"}
+                    </span>
+                  </div>
+                  <p className="text-lg text-ink-secondary leading-relaxed max-w-prose mb-6">
+                    {profile?.experienceDescription ||
+                      "Menganalisis inefisiensi proses bisnis dunia nyata, merancang alur digital yang efisien, serta membangun solusi perangkat lunak end-to-end dengan dukungan AI agent."}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-line">
+                    <div className="flex flex-col gap-1">
+                      <Eyebrow tone="muted">PERAN</Eyebrow>
+                      <span className="text-base text-ink font-medium">
+                        {profile?.experienceRole ||
+                          "Independent Developer & Strategist"}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <Eyebrow tone="muted">KAPABILITAS</Eyebrow>
+                      <span className="text-base text-ink font-medium">
+                        {profile?.experienceCapabilities ||
+                          "Full-Stack Web & AI Agents"}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <Eyebrow tone="muted">BASIS</Eyebrow>
+                      <span className="text-base text-ink font-medium">
+                        {profile?.experienceBase || "Pontianak, ID"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
           </article>
         </div>
       </main>
@@ -215,3 +338,4 @@ function ProjectCardNASA({
 
   return CardContent;
 }
+
