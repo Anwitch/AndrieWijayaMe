@@ -81,6 +81,9 @@ export default defineSchema({
     isPublished: v.boolean(),
     createdAt: v.optional(v.number()),
     updatedAt: v.optional(v.number()),
+    titleId: v.optional(v.string()),
+    excerptId: v.optional(v.string()),
+    contentId: v.optional(v.string()),
   })
     .index("by_slug", ["slug"])
     .index("by_isPublished_and_publishedAt", ["isPublished", "publishedAt"]),

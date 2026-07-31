@@ -120,6 +120,9 @@ export const listPublished = query({
         isPublished: post.isPublished,
         createdAt: post.createdAt,
         updatedAt: post.updatedAt,
+        titleId: post.titleId,
+        excerptId: post.excerptId,
+        contentId: post.contentId,
       })),
     };
   },

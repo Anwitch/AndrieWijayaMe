@@ -221,3 +221,380 @@ export const applyCaseStudies = internalMutation({
     return summary.length > 0 ? summary : ["no matching projects found"];
   },
 });
+
+const CONVEX_VS_FIREBASE_CONTENT = `Building modern full-stack web applications with Next.js requires a backend architecture that can deliver fast initial renders, seamless client-side state synchronization, and strict type safety.
+
+For years, Firebase (and Firestore in particular) was the default choice for developers seeking a serverless, real-time database. However, as web application patterns evolved—especially with React Server Components (RSC) and strict TypeScript workflows—the friction points of traditional document databases became increasingly apparent.
+
+In our recent projects, we shifted our primary backend stack to **Convex**. Below is an in-depth technical analysis comparing Convex and Firebase across four critical engineering dimensions: type safety, reactivity, transactional integrity, and developer ergonomics.
+
+---
+
+## 1. End-to-End Type Safety & DX
+
+### Firebase
+In Firestore, data validation and schema definitions are decoupled from the code consuming it. Type safety is typically maintained through manual TypeScript interfaces and runtime casting:
+
+\`\`\`typescript
+// Firestore client code: manual casting & untyped queries
+const docRef = doc(db, "projects", projectId);
+const snapshot = await getDoc(docRef);
+const data = snapshot.data() as ProjectData; // Unsafe runtime assertion
+\`\`\`
+
+Security rules and data validation are written in Firebase's proprietary Domain Specific Language (DSL):
+
+\`\`\`cel
+// Firestore security rules (separate file, separate paradigm)
+match /projects/{projectId} {
+  allow read: if request.auth != null;
+  allow write: if request.auth.uid == resource.data.ownerId;
+}
+\`\`\`
+
+This creates a cognitive tax: backend security logic, frontend type definitions, and database indexes exist in three distinct formats and locations.
+
+### Convex
+Convex treats TypeScript as a first-class primitive. Schemas are defined centrally in \`convex/schema.ts\` using runtime validators that automatically generate strict TypeScript types across the entire application:
+
+\`\`\`typescript
+// convex/schema.ts
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+
+export default defineSchema({
+  projects: defineTable({
+    title: v.string(),
+    ownerId: v.string(),
+    isPublished: v.boolean(),
+  }).index("by_owner", ["ownerId"]),
+});
+\`\`\`
+
+Querying functions are completely typed end-to-end without manual type annotations or code generation CLI steps:
+
+\`\`\`typescript
+// Next.js component: 100% type-safe reactive query
+const projects = useQuery(api.projects.listByOwner, { ownerId: user.id });
+\`\`\`
+
+If a table schema changes, TypeScript immediately surfaces type errors across both server and client code during build time.
+
+---
+
+## 2. Reactive State & Subscriptions
+
+Both platforms support real-time data streaming, but their underlying architectures differ fundamentally.
+
+### Firebase Firestore
+Firestore uses snapshot listeners (\`onSnapshot\`). While powerful, developers must manually attach listeners, manage unsubscribe cleanup logic, and handle local cache reconciliation:
+
+- **State Drift:** If multiple components subscribe to different sub-collections, coordinating state across the tree requires complex client-side global state stores (Zustand/Redux).
+- **Read Amplification:** Unoptimized snapshot listeners can quickly amplify document read counts, leading to unexpected billing spikes.
+
+### Convex
+Convex redefines reactivity by making every query function reactive by default:
+
+\`\`\`typescript
+// convex/projects.ts
+import { query } from "./_generated/server";
+import { v } from "convex/values";
+
+export const listByOwner = query({
+  args: { ownerId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("projects")
+      .withIndex("by_owner", (q) => q.eq("ownerId", args.ownerId))
+      .collect();
+  },
+});
+\`\`\`
+
+When a component calls \`useQuery(api.projects.listByOwner, ...)\`:
+1. Convex automatically tracks which database documents were read during execution.
+2. If any of those specific documents are modified by a mutation, Convex automatically reruns the query on the server and pushes only the delta to subscribed clients.
+3. No manual cache invalidation or listener lifecycle management is required.
+
+---
+
+## 3. ACID Transactions vs. Optimistic Locks
+
+### Firebase
+Firestore operations are split across client SDK calls, Security Rules, and Cloud Functions (Node.js). 
+
+- Complex multi-document writes often require Firestore Transactions or Batched Writes.
+- Server-side business logic running in Firebase Cloud Functions suffers from cold starts and asynchronous execution delays.
+- Race conditions during concurrent updates must be explicitly mitigated by developers using optimistic concurrency controls.
+
+### Convex
+All Convex mutations execute as **deterministic, isolated ACID transactions** in a fast V8 execution environment:
+
+\`\`\`typescript
+// convex/projects.ts
+import { mutation } from "./_generated/server";
+import { v } from "convex/values";
+
+export const publishProject = mutation({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("Project not found");
+    
+    // Atomic update guarantee
+    await ctx.db.patch(args.projectId, { isPublished: true, updatedAt: Date.now() });
+  },
+});
+\`\`\`
+
+If two mutations attempt to modify the same document concurrently, Convex handles Optimistic Concurrency Control (OCC) automatically behind the scenes—retrying the transaction transparently without leaving the database in an inconsistent state.
+
+---
+
+## 4. Next.js App Router & SSR Ergonomics
+
+Integrating Firebase with Next.js App Router (React Server Components) requires navigating complex authentication token handshakes between client SDKs and server-side Admin SDKs (\`firebase-admin\`).
+
+Convex provides official integration packages (\`convex/nextjs\`) that allow seamless data fetching across both Server Components and Client Components:
+
+\`\`\`typescript
+// Server Component (RSC) pre-fetching
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@/convex/_generated/api";
+
+export default async function ProjectsPage() {
+  // Pre-rendered on the server with zero client waterfall
+  const posts = await fetchQuery(api.posts.listPublished, {});
+  
+  return <ProjectsList initialData={posts} />;
+}
+\`\`\`
+
+---
+
+## Architecture Comparison Matrix
+
+| Feature | Firebase (Firestore) | Convex |
+| :--- | :--- | :--- |
+| **Type Safety** | Manual casting (\`as Type\`) | End-to-end inference from schema |
+| **Business Logic** | Split: Security Rules + Cloud Functions | Pure TypeScript Server Functions |
+| **Reactivity** | Snapshot listeners (\`onSnapshot\`) | Automatic Reactive Queries (\`useQuery\`) |
+| **Transactions** | Explicit transaction objects | All mutations are ACID transactions |
+| **Next.js RSC Support** | Complex (Admin SDK vs Client SDK) | Native (\`fetchQuery\` & \`preloadQuery\`) |
+| **Local DX / Emulators** | Java-based Firebase Suite | Lightweight local runner (\`npx convex dev\`) |
+
+---
+
+## Conclusion
+
+Firebase remains a solid platform for mobile-first apps requiring offline persistence out of the box. However, for modern web applications built on Next.js, React Server Components, and TypeScript, **Convex delivers a dramatically superior developer experience, bulletproof type safety, and zero-maintenance reactivity.**
+
+By eliminating the gap between database logic, security rules, and frontend state, Convex allows engineering teams to ship reliable, high-performance web products in a fraction of the time.`;
+
+const CONVEX_VS_FIREBASE_CONTENT_ID = `Membangun aplikasi web full-stack modern dengan Next.js memerlukan arsitektur backend yang mampu memberikan performa render awal yang cepat, sinkronisasi state client-side tanpa hambatan, serta type safety yang ketat.
+
+Selama bertahun-tahun, Firebase (khususnya Firestore) menjadi pilihan utama bagi para pengembang yang membutuhkan database real-time serverless. Namun, seiring berkembangnya pola aplikasi web—terutama dengan hadirnya React Server Components (RSC) dan alur kerja TypeScript yang ketat—berbagai hambatan arsitektural pada database dokumen tradisional mulai terasa.
+
+Dalam proyek-proyek terbaru kami, kami mengalihkan stack backend utama kami ke **Convex**. Berikut adalah analisis teknis mendalam yang membandingkan Convex dan Firebase pada empat dimensi rekayasa utama: type safety, reaktivitas, integritas transaksi, dan ergonomi pengembang.
+
+---
+
+## 1. End-to-End Type Safety & DX
+
+### Firebase
+Di Firestore, validasi data dan definisi skema terpisah dari kode aplikasi. Type safety umumnya dikelola secara manual melalui interface TypeScript dan runtime casting:
+
+\`\`\`typescript
+// Kode client Firestore: casting manual & query tanpa tipe
+const docRef = doc(db, "projects", projectId);
+const snapshot = await getDoc(docRef);
+const data = snapshot.data() as ProjectData; // Asersi tipe yang berisiko
+\`\`\`
+
+Aturan keamanan (Security Rules) dan validasi data ditulis dalam Domain Specific Language (DSL) milik Firebase yang terpisah:
+
+\`\`\`cel
+// Security rules Firestore (berkas terpisah, paradigma berbeda)
+match /projects/{projectId} {
+  allow read: if request.auth != null;
+  allow write: if request.auth.uid == resource.data.ownerId;
+}
+\`\`\`
+
+Hal ini menciptakan beban kognitif: logika keamanan backend, definisi tipe frontend, dan indeks database berada di tiga format dan tempat terpisah.
+
+### Convex
+Convex memperlakukan TypeScript sebagai komponen utama. Skema didefinisikan secara tersentralisasi di \`convex/schema.ts\` menggunakan validator runtime yang secara otomatis menghasilkan tipe TypeScript yang ketat untuk seluruh aplikasi:
+
+\`\`\`typescript
+// convex/schema.ts
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+
+export default defineSchema({
+  projects: defineTable({
+    title: v.string(),
+    ownerId: v.string(),
+    isPublished: v.boolean(),
+  }).index("by_owner", ["ownerId"]),
+});
+\`\`\`
+
+Query ditulis dengan type safety 100% tanpa perlu konfigurasi CLI pembuat tipe tambahan:
+
+\`\`\`typescript
+// Komponen Next.js: query reaktif yang 100% type-safe
+const projects = useQuery(api.projects.listByOwner, { ownerId: user.id });
+\`\`\`
+
+Jika terjadi perubahan pada skema tabel, TypeScript akan langsung mendeteksi error pada server maupun client saat proses build.
+
+---
+
+## 2. Realtime State & Subscriptions
+
+Kedua platform mendukung streaming data real-time, tetapi arsitektur dasarnya berbeda secara fundamental.
+
+### Firebase Firestore
+Firestore menggunakan snapshot listener (\`onSnapshot\`). Meskipun canggih, pengembang harus mengelola siklus hidup listener, proses unsubscribe, serta rekonsiliasi cache lokal secara manual:
+
+- **State Drift:** Jika beberapa komponen berlangganan sub-koleksi yang berbeda, mengoordinasikan state antar komponen memerlukan store global seperti Zustand/Redux.
+- **Read Amplification:** Snapshot listener yang tidak dioptimalkan dapat membengkakkan jumlah pembacaan dokumen dengan cepat, berisiko menyebabkan lonjakan biaya.
+
+### Convex
+Convex merevolusi reaktivitas dengan menjadikan setiap query reaktif secara default:
+
+\`\`\`typescript
+// convex/projects.ts
+import { query } from "./_generated/server";
+import { v } from "convex/values";
+
+export const listByOwner = query({
+  args: { ownerId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("projects")
+      .withIndex("by_owner", (q) => q.eq("ownerId", args.ownerId))
+      .collect();
+  },
+});
+\`\`\`
+
+Ketika komponen memanggil \`useQuery(api.projects.listByOwner, ...)\`:
+1. Convex secara otomatis mencatat dokumen database mana saja yang dibaca selama eksekusi query.
+2. Jika ada dokumen terkait yang diubah oleh transaksi mutation, Convex secara otomatis menjalankan ulang query di server dan hanya mengirimkan perubahan (*delta*) ke client.
+3. Tidak ada invalidasi cache manual atau manajemen siklus hidup listener yang diperlukan.
+
+---
+
+## 3. Transaksi ACID vs. Optimistic Locks
+
+### Firebase
+Operasi Firestore terbagi di antara Client SDK, Security Rules, dan Cloud Functions (Node.js). 
+
+- Operasi multi-dokumen kompleks memerlukan Firestore Transactions atau Batched Writes.
+- Logika bisnis server-side yang berjalan di Firebase Cloud Functions mengalami *cold starts* dan penundaan eksekusi asinkron.
+
+### Convex
+Semua mutation pada Convex dieksekusi sebagai **transaksi ACID yang terisolasi dan deterministik** dalam lingkungan V8 yang sangat cepat:
+
+\`\`\`typescript
+// convex/projects.ts
+import { mutation } from "./_generated/server";
+import { v } from "convex/values";
+
+export const publishProject = mutation({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("Project tidak ditemukan");
+    
+    // Jaminan pembaruan atomis
+    await ctx.db.patch(args.projectId, { isPublished: true, updatedAt: Date.now() });
+  },
+});
+\`\`\`
+
+Jika dua mutation mencoba mengubah dokumen yang sama secara bersamaan, Convex menangani Optimistic Concurrency Control (OCC) secara otomatis di balik layar—mengulangi transaksi secara transparan tanpa meninggalkan kondisi database yang inkonsisten.
+
+---
+
+## 4. Next.js App Router & SSR Ergonomics
+
+Mengintegrasikan Firebase dengan Next.js App Router (React Server Components) memerlukan pengelolaan token autentikasi antara Client SDK dan Server Admin SDK (\`firebase-admin\`).
+
+Convex menyediakan integrasi resmi (\`convex/nextjs\`) yang memungkinkan pengambilan data tanpa hambatan baik di Server Component maupun Client Component:
+
+\`\`\`typescript
+// Pre-fetching pada Server Component (RSC)
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@/convex/_generated/api";
+
+export default async function ProjectsPage() {
+  // Dihasilkan di server tanpa waterfall pada client
+  const posts = await fetchQuery(api.posts.listPublished, {});
+  
+  return <ProjectsList initialData={posts} />;
+}
+\`\`\`
+
+---
+
+## Matriks Perbandingan Arsitektur
+
+| Fitur | Firebase (Firestore) | Convex |
+| :--- | :--- | :--- |
+| **Type Safety** | Casting manual (\`as Type\`) | Inferensi otomatis dari skema |
+| **Logika Bisnis** | Terpisah: Security Rules + Cloud Functions | Murni TypeScript Server Functions |
+| **Reaktivitas** | Snapshot listeners (\`onSnapshot\`) | Query Reaktif Otomatis (\`useQuery\`) |
+| **Transaksi** | Objek transaksi eksplisit | Semua mutation adalah transaksi ACID |
+| **Dukungan Next.js RSC** | Kompleks (Admin SDK vs Client SDK) | Native (\`fetchQuery\` & \`preloadQuery\`) |
+| **Developer Experience** | Firebase Emulator Suite (Java) | Local runner ringan (\`npx convex dev\`) |
+
+---
+
+## Kesimpulan
+
+Firebase tetap menjadi platform yang tangguh untuk aplikasi berbasis mobile yang membutuhkan penyimpanan offline out-of-the-box. Namun, untuk aplikasi web modern yang dibangun di atas Next.js, React Server Components, dan TypeScript, **Convex menghadirkan developer experience yang jauh lebih unggul, type safety yang andal, dan reaktivitas tanpa beban pemeliharaan.**`;
+
+/**
+ * Idempotent seed for the "Convex vs Firebase" technical article with dual EN/ID support.
+ * Can be run via `npx convex run seedEntity:applyConvexVsFirebaseArticle [--prod]`.
+ */
+export const applyConvexVsFirebaseArticle = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const slug = "convex-vs-firebase-nextjs";
+    const existing = await ctx.db
+      .query("posts")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .unique();
+
+    const now = Date.now();
+    const postData = {
+      title: "Why We Chose Convex Over Firebase for Modern Next.js Applications",
+      slug,
+      content: CONVEX_VS_FIREBASE_CONTENT,
+      excerpt:
+        "A technical breakdown of reactive state management, end-to-end TypeScript safety, ACID transactions, and developer ergonomics when building full-stack web applications with Next.js.",
+      titleId: "Mengapa Kami Memilih Convex Dibandingkan Firebase untuk Aplikasi Next.js Modern",
+      excerptId:
+        "Analisis teknis tentang manajemen state reaktif, type safety TypeScript end-to-end, transaksi ACID, dan ergonomi pengembang saat membangun aplikasi web full-stack dengan Next.js.",
+      contentId: CONVEX_VS_FIREBASE_CONTENT_ID,
+      category: "Architecture",
+      isPublished: true,
+      publishedAt: now,
+      updatedAt: now,
+    };
+
+    if (existing) {
+      await ctx.db.patch(existing._id, postData);
+      return `Updated post '${slug}' (${existing._id})`;
+    } else {
+      const id = await ctx.db.insert("posts", { ...postData, createdAt: now });
+      return `Inserted post '${slug}' (${id})`;
+    }
+  },
+});
+
+
