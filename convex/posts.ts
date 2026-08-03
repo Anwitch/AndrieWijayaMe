@@ -90,12 +90,22 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    const { id, ...updates } = args;
-    if (args.coverMediaId === null) {
-      updates.coverMediaId = undefined;
-    } else if (args.coverMediaId !== undefined) {
+    const id = args.id;
+    if (args.coverMediaId !== undefined && args.coverMediaId !== null) {
       await assertPostCover(ctx, args.coverMediaId);
     }
+    const updates: {
+      title?: string;
+      content?: string;
+      excerpt?: string;
+      category?: string;
+      slug?: string;
+      coverMediaId?: Id<"media">;
+      titleId?: string;
+      excerptId?: string;
+      contentId?: string;
+      isPublished?: boolean;
+    } = {};
     if (args.title !== undefined) {
       updates.title = requiredText(args.title, "Post title", 200);
     }
@@ -133,6 +143,13 @@ export const update = mutation({
         throw new ConvexError("A post with this URL slug already exists.");
       }
       updates.slug = slug;
+    }
+    if (args.isPublished !== undefined) {
+      updates.isPublished = args.isPublished;
+    }
+    if (args.coverMediaId !== undefined) {
+      // null clears the cover; an id sets it; undefined leaves it unchanged.
+      updates.coverMediaId = args.coverMediaId ?? undefined;
     }
     await ctx.db.patch(id, { ...updates, updatedAt: Date.now() });
   },

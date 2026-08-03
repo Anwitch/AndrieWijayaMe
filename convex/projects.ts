@@ -63,11 +63,9 @@ async function assertProjectCover(
 }
 
 /** Returns a project with a public coverUrl attached (and internal id dropped). */
-async function withCover(
-  ctx: MutationCtx | QueryCtx,
-  project: {
-    coverMediaId?: Id<"media">;
-  } & object,
+async function withCover<T extends { coverMediaId?: Id<"media"> }>(
+  ctx: QueryCtx | MutationCtx,
+  project: T,
 ) {
   const coverUrl = await resolveCoverUrl(
     ctx,
@@ -308,13 +306,22 @@ export const updateProject = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    const { id, ...fields } = args;
-    if (fields.coverMediaId === null) {
-      // Explicit clear -> remove any stored cover.
-      fields.coverMediaId = undefined;
-    } else if (fields.coverMediaId !== undefined) {
+    const id = args.id;
+    if (args.coverMediaId !== undefined && args.coverMediaId !== null) {
       await assertProjectCover(ctx, args.coverMediaId);
     }
+    const fields: {
+      title?: string;
+      description?: string;
+      year?: string;
+      tags?: string;
+      link?: string;
+      slug?: string;
+      caseStudy?: string;
+      coverMediaId?: Id<"media">;
+      isFeatured?: boolean;
+      isPublished?: boolean;
+    } = {};
     if (args.title !== undefined) {
       fields.title = requiredText(args.title, "Project title", 160);
     }
@@ -345,6 +352,16 @@ export const updateProject = mutation({
     }
     if (args.caseStudy !== undefined) {
       fields.caseStudy = limitedText(args.caseStudy, "Case study", 200000);
+    }
+    if (args.isFeatured !== undefined) {
+      fields.isFeatured = args.isFeatured;
+    }
+    if (args.isPublished !== undefined) {
+      fields.isPublished = args.isPublished;
+    }
+    if (args.coverMediaId !== undefined) {
+      // null clears the cover; an id sets it; undefined leaves it unchanged.
+      fields.coverMediaId = args.coverMediaId ?? undefined;
     }
     await ctx.db.patch(id, { ...fields, updatedAt: Date.now() });
   },

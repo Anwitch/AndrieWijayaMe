@@ -15,5 +15,6 @@ export async function resolveCoverUrl(
   if (!coverMediaId) return undefined;
   const media = await ctx.db.get("media", coverMediaId);
   if (!media || media.purpose !== purpose) return undefined;
-  return ctx.storage.getUrl(media.storageId);
+  const url = await ctx.storage.getUrl(media.storageId);
+  return url ?? undefined;
 }
