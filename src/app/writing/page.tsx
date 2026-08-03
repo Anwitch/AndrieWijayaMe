@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { usePaginatedQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import PublicShell from "@/components/PublicShell";
@@ -15,13 +16,26 @@ import Link from "next/link";
 import { Globe } from "lucide-react";
 
 export default function WritingPage() {
-  const [lang, setLang] = useState<"en" | "id">("en");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [lang, setLang] = useState<"en" | "id">(
+    searchParams.get("lang") === "id" ? "id" : "en",
+  );
   const { results: posts, status, loadMore } = usePaginatedQuery(
     api.posts.listPublished,
     {},
     { initialNumItems: 20 },
   );
   const isLoading = status === "LoadingFirstPage";
+
+  const setLanguage = (next: "en" | "id") => {
+    setLang(next);
+    const sp = new URLSearchParams(searchParams.toString());
+    if (next === "id") sp.set("lang", "id");
+    else sp.delete("lang");
+    const qs = sp.toString();
+    router.replace(`${window.location.pathname}${qs ? `?${qs}` : ""}`);
+  };
 
   return (
     <PublicShell>
@@ -40,7 +54,7 @@ export default function WritingPage() {
             <Globe size={14} className="text-ink-muted ml-1" />
             <button
               type="button"
-              onClick={() => setLang("en")}
+              onClick={() => setLanguage("en")}
               className={`font-mono text-xs px-2.5 py-1 rounded-sm transition-colors ${
                 lang === "en"
                   ? "bg-accent text-white font-medium"
@@ -51,7 +65,7 @@ export default function WritingPage() {
             </button>
             <button
               type="button"
-              onClick={() => setLang("id")}
+              onClick={() => setLanguage("id")}
               className={`font-mono text-xs px-2.5 py-1 rounded-sm transition-colors ${
                 lang === "id"
                   ? "bg-accent text-white font-medium"
@@ -88,6 +102,14 @@ export default function WritingPage() {
                   key={post._id}
                   className="group border-b border-line pb-12 last:border-0"
                 >
+                  {(post as { coverUrl?: string }).coverUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={(post as { coverUrl?: string }).coverUrl}
+                      alt={`Cover ${title}`}
+                      className="mb-5 h-40 w-full rounded-sm object-cover"
+                    />
+                  )}
                   <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-4 mb-4">
                     <div className="flex items-center gap-4">
                       <Eyebrow tone="accent">{post.category}</Eyebrow>
@@ -105,7 +127,10 @@ export default function WritingPage() {
                     </div>
                   </div>
 
-                  <Link href={`/writing/${post.slug}`} className="block group">
+                  <Link
+                    href={`/writing/${post.slug}${lang === "id" ? "?lang=id" : ""}`}
+                    className="block group"
+                  >
                     <h2 className="text-2xl font-semibold text-ink group-hover:text-accent transition-colors mb-4">
                       {title}
                     </h2>

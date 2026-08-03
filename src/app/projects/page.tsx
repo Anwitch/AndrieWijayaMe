@@ -102,6 +102,14 @@ export default function ProjectsArchive() {
                       {project.year}
                     </td>
                     <td className="py-8 align-top">
+                      {(project as { coverUrl?: string }).coverUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={(project as { coverUrl?: string }).coverUrl}
+                          alt={`Cover ${project.title}`}
+                          className="mb-4 h-28 w-full max-w-xs rounded-sm object-cover"
+                        />
+                      )}
                       {project.slug ? (
                         <Link
                           href={`/projects/${project.slug}`}

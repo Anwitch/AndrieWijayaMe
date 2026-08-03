@@ -30,6 +30,9 @@ export default function AddPostForm() {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
   const [excerpt, setExcerpt] = useState("");
+  const [titleId, setTitleId] = useState("");
+  const [contentId, setContentId] = useState("");
+  const [excerptId, setExcerptId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -90,12 +93,18 @@ export default function AddPostForm() {
           excerpt.trim() ||
           `${cleanContent.substring(0, 150)}${cleanContent.length > 150 ? "..." : ""}`,
         category: category.trim() || "Uncategorized",
+        titleId: titleId.trim(),
+        excerptId: excerptId.trim(),
+        contentId: contentId.trim(),
         isPublished: true,
       });
       setTitle("");
       setContent("");
       setCategory("");
       setExcerpt("");
+      setTitleId("");
+      setContentId("");
+      setExcerptId("");
       setIsOpen(false);
       setTab("edit");
     } catch (submitError) {
@@ -182,6 +191,53 @@ export default function AddPostForm() {
             className={inputUnderlineClass}
             placeholder="Short summary of the post"
           />
+        </div>
+
+        <div className="border-t border-line pt-4">
+          <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-ink-faint">
+            Indonesian (ID) — optional translation
+          </p>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="post-title-id" className={labelClass}>
+                Judul (Bahasa Indonesia)
+              </label>
+              <input
+                id="post-title-id"
+                disabled={isSubmitting}
+                value={titleId}
+                onChange={(e) => setTitleId(e.target.value)}
+                className={inputUnderlineClass}
+                placeholder="Judul terjemahan (opsional)"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="post-excerpt-id" className={labelClass}>
+                Ringkasan (Bahasa Indonesia)
+              </label>
+              <input
+                id="post-excerpt-id"
+                disabled={isSubmitting}
+                value={excerptId}
+                onChange={(e) => setExcerptId(e.target.value)}
+                className={inputUnderlineClass}
+                placeholder="Ringkasan terjemahan (opsional)"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="post-content-id" className={labelClass}>
+                Konten (Bahasa Indonesia, Markdown)
+              </label>
+              <textarea
+                id="post-content-id"
+                disabled={isSubmitting}
+                value={contentId}
+                onChange={(e) => setContentId(e.target.value)}
+                className="border border-line p-3 outline-none text-sm min-h-[200px] font-mono focus:border-ink transition-colors"
+                placeholder="Terjemahan konten lengkap (opsional)"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">

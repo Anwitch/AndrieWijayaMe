@@ -14,6 +14,7 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { getErrorMessage } from "@/lib/errors";
+import CoverPicker from "./CoverPicker";
 
 interface PostManagerProps {
   posts: Doc<"posts">[] | undefined;
@@ -26,6 +27,10 @@ const emptyPostForm = {
   category: "",
   excerpt: "",
   content: "",
+  titleId: "",
+  excerptId: "",
+  contentId: "",
+  coverMediaId: undefined as Id<"media"> | undefined,
 };
 
 const editInputClass =
@@ -53,6 +58,10 @@ export default function PostManager({
       category: post.category,
       excerpt: post.excerpt,
       content: post.content,
+      titleId: post.titleId ?? "",
+      excerptId: post.excerptId ?? "",
+      contentId: post.contentId ?? "",
+      coverMediaId: post.coverMediaId ?? undefined,
     });
   };
 
@@ -100,6 +109,10 @@ export default function PostManager({
           content,
           category: editFormData.category.trim() || "Uncategorized",
           excerpt: editFormData.excerpt.trim(),
+          titleId: editFormData.titleId.trim(),
+          excerptId: editFormData.excerptId.trim(),
+          contentId: editFormData.contentId.trim(),
+          coverMediaId: editFormData.coverMediaId ?? null,
         }),
       () => setEditingPostId(null),
     );
@@ -199,6 +212,59 @@ export default function PostManager({
                             }
                             className={`${editInputClass} text-xs`}
                             placeholder="Excerpt"
+                          />
+                          <span className="pt-2 font-mono text-[10px] uppercase tracking-widest text-ink-faint">
+                            Indonesian (ID) — optional
+                          </span>
+                          <input
+                            aria-label="Indonesian post title"
+                            value={editFormData.titleId}
+                            disabled={isSaving}
+                            onChange={(event) =>
+                              setEditFormData({
+                                ...editFormData,
+                                titleId: event.target.value,
+                              })
+                            }
+                            className={`${editInputClass} text-xs`}
+                            placeholder="Judul (Bahasa Indonesia)"
+                          />
+                          <textarea
+                            aria-label="Indonesian post content"
+                            value={editFormData.contentId}
+                            disabled={isSaving}
+                            onChange={(event) =>
+                              setEditFormData({
+                                ...editFormData,
+                                contentId: event.target.value,
+                              })
+                            }
+                            className={`${editInputClass} text-xs min-h-[100px] font-mono`}
+                            placeholder="Konten (Bahasa Indonesia, Markdown)"
+                          />
+                          <input
+                            aria-label="Indonesian post excerpt"
+                            value={editFormData.excerptId}
+                            disabled={isSaving}
+                            onChange={(event) =>
+                              setEditFormData({
+                                ...editFormData,
+                                excerptId: event.target.value,
+                              })
+                            }
+                            className={`${editInputClass} text-xs`}
+                            placeholder="Ringkasan (Bahasa Indonesia)"
+                          />
+                          <CoverPicker
+                            purpose="post-cover"
+                            value={editFormData.coverMediaId}
+                            disabled={isSaving}
+                            onChange={(mediaId) =>
+                              setEditFormData({
+                                ...editFormData,
+                                coverMediaId: mediaId ?? undefined,
+                              })
+                            }
                           />
                         </td>
                         <td className="py-4 align-top">

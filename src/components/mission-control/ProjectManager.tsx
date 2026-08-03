@@ -26,6 +26,7 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { getErrorMessage } from "@/lib/errors";
+import CoverPicker from "./CoverPicker";
 
 interface ProjectManagerProps {
   projects: Doc<"projects">[] | undefined;
@@ -41,6 +42,7 @@ const emptyProjectForm = {
   link: "",
   slug: "",
   caseStudy: "",
+  coverMediaId: undefined as Id<"media"> | undefined,
 };
 
 const editInputClass =
@@ -73,6 +75,7 @@ export default function ProjectManager({
       link: project.link ?? "",
       slug: project.slug ?? "",
       caseStudy: project.caseStudy ?? "",
+      coverMediaId: project.coverMediaId ?? undefined,
     });
   };
 
@@ -123,6 +126,7 @@ export default function ProjectManager({
           link: editFormData.link.trim(),
           slug: editFormData.slug.trim(),
           caseStudy: editFormData.caseStudy.trim(),
+          coverMediaId: editFormData.coverMediaId ?? null,
         }),
       () => setEditingProjectId(null),
     );
@@ -275,6 +279,17 @@ export default function ProjectManager({
                             }
                             className={`${editInputClass} text-xs min-h-[120px] font-mono`}
                             placeholder="Case study (Markdown)"
+                          />
+                          <CoverPicker
+                            purpose="project-cover"
+                            value={editFormData.coverMediaId}
+                            disabled={isSaving}
+                            onChange={(mediaId) =>
+                              setEditFormData({
+                                ...editFormData,
+                                coverMediaId: mediaId ?? undefined,
+                              })
+                            }
                           />
                         </td>
                         <td className="py-4 align-top">

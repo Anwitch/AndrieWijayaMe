@@ -156,7 +156,7 @@ function UnauthorizedMissionControl() {
           onClick={() => void handleSignOut()}
           className="mt-8 w-full"
         >
-          Sign Out
+          Sign in with a different account
         </Button>
       </section>
     </main>

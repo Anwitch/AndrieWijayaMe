@@ -3,6 +3,31 @@ import { ConvexError, v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { requireAdmin } from "./lib/admin";
 import { canonicalSlug, limitedText, requiredText } from "./lib/validation";
+import { resolveCoverUrl } from "./lib/mediaCover";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+
+/** Ensures a coverMediaId references a valid, post-cover purpose media doc. */
+async function assertPostCover(
+  ctx: MutationCtx,
+  coverMediaId: Id<"media"> | undefined,
+) {
+  if (coverMediaId === undefined) return;
+  const media = await ctx.db.get("media", coverMediaId);
+  if (!media || media.purpose !== "post-cover") {
+    throw new ConvexError("Selected cover is not a valid post-cover image.");
+  }
+}
+
+/** Attaches a public coverUrl to a post (drops the internal coverMediaId). */
+async function withPostCover<T extends { coverMediaId?: Id<"media"> }>(
+  ctx: QueryCtx,
+  post: T,
+) {
+  const coverUrl = await resolveCoverUrl(ctx, post.coverMediaId, "post-cover");
+  const { coverMediaId: _drop, ...rest } = post;
+  return { ...rest, coverUrl };
+}
 
 export const create = mutation({
   args: {
@@ -11,10 +36,15 @@ export const create = mutation({
     content: v.string(),
     excerpt: v.string(),
     category: v.string(),
+    coverMediaId: v.optional(v.id("media")),
+    titleId: v.optional(v.string()),
+    excerptId: v.optional(v.string()),
+    contentId: v.optional(v.string()),
     isPublished: v.boolean(),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    await assertPostCover(ctx, args.coverMediaId);
     const slug = canonicalSlug(args.slug);
     const existingPost = await ctx.db
       .query("posts")
@@ -31,6 +61,10 @@ export const create = mutation({
       content: requiredText(args.content, "Post content", 200000),
       excerpt: limitedText(args.excerpt, "Post excerpt", 500),
       category: requiredText(args.category, "Post category", 100),
+      coverMediaId: args.coverMediaId,
+      titleId: args.titleId ? limitedText(args.titleId, "Indonesian title", 200) : undefined,
+      excerptId: args.excerptId ? limitedText(args.excerptId, "Indonesian excerpt", 500) : undefined,
+      contentId: args.contentId ? limitedText(args.contentId, "Indonesian content", 200000) : undefined,
       isPublished: args.isPublished,
       publishedAt: now,
       createdAt: now,
@@ -48,11 +82,20 @@ export const update = mutation({
     content: v.optional(v.string()),
     excerpt: v.optional(v.string()),
     category: v.optional(v.string()),
+    coverMediaId: v.optional(v.union(v.id("media"), v.null())),
+    titleId: v.optional(v.string()),
+    excerptId: v.optional(v.string()),
+    contentId: v.optional(v.string()),
     isPublished: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const { id, ...updates } = args;
+    if (args.coverMediaId === null) {
+      updates.coverMediaId = undefined;
+    } else if (args.coverMediaId !== undefined) {
+      await assertPostCover(ctx, args.coverMediaId);
+    }
     if (args.title !== undefined) {
       updates.title = requiredText(args.title, "Post title", 200);
     }
@@ -64,6 +107,21 @@ export const update = mutation({
     }
     if (args.category !== undefined) {
       updates.category = requiredText(args.category, "Post category", 100);
+    }
+    if (args.titleId !== undefined) {
+      updates.titleId = args.titleId
+        ? limitedText(args.titleId, "Indonesian title", 200)
+        : undefined;
+    }
+    if (args.excerptId !== undefined) {
+      updates.excerptId = args.excerptId
+        ? limitedText(args.excerptId, "Indonesian excerpt", 500)
+        : undefined;
+    }
+    if (args.contentId !== undefined) {
+      updates.contentId = args.contentId
+        ? limitedText(args.contentId, "Indonesian content", 200000)
+        : undefined;
     }
     if (args.slug !== undefined) {
       const slug = canonicalSlug(args.slug);
@@ -109,21 +167,24 @@ export const listPublished = query({
       .paginate(args.paginationOpts);
     return {
       ...result,
-      page: result.page.map((post) => ({
-        _id: post._id,
-        _creationTime: post._creationTime,
-        title: post.title,
-        slug: post.slug,
-        excerpt: post.excerpt,
-        category: post.category,
-        publishedAt: post.publishedAt,
-        isPublished: post.isPublished,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        titleId: post.titleId,
-        excerptId: post.excerptId,
-        contentId: post.contentId,
-      })),
+      page: await Promise.all(
+        result.page.map(async (post) => ({
+          _id: post._id,
+          _creationTime: post._creationTime,
+          title: post.title,
+          slug: post.slug,
+          excerpt: post.excerpt,
+          category: post.category,
+          coverUrl: await resolveCoverUrl(ctx, post.coverMediaId, "post-cover"),
+          publishedAt: post.publishedAt,
+          isPublished: post.isPublished,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+          titleId: post.titleId,
+          excerptId: post.excerptId,
+          contentId: post.contentId,
+        })),
+      ),
     };
   },
 });
@@ -135,6 +196,7 @@ export const getBySlug = query({
       .query("posts")
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
       .unique();
-    return post?.isPublished ? post : null;
+    if (!post?.isPublished) return null;
+    return withPostCover(ctx, post);
   },
 });

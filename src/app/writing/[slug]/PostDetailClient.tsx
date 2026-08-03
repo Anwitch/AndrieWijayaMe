@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Eyebrow, MonoLink } from "@/components/ui";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -16,17 +17,32 @@ export default function PostDetailClient({
   post,
   siteName,
 }: PostDetailClientProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [lang, setLang] = useState<"en" | "id">(
+    searchParams.get("lang") === "id" ? "id" : "en",
+  );
   const hasIdContent = Boolean(post.titleId && post.contentId);
-  const [lang, setLang] = useState<"en" | "id">("en");
+
+  const setLanguage = (next: "en" | "id") => {
+    setLang(next);
+    const sp = new URLSearchParams(searchParams.toString());
+    if (next === "id") sp.set("lang", "id");
+    else sp.delete("lang");
+    const qs = sp.toString();
+    router.replace(`${window.location.pathname}${qs ? `?${qs}` : ""}`);
+  };
 
   const title = lang === "id" && post.titleId ? post.titleId : post.title;
   const content =
     lang === "id" && post.contentId ? post.contentId : post.content;
+  const archiveHref =
+    lang === "id" ? "/writing?lang=id" : "/writing";
 
   return (
     <main className="max-w-3xl mx-auto px-6 py-16 md:py-24 animate-fade-in-up">
       <div className="flex items-center justify-between mb-12">
-        <MonoLink href="/writing" className="group">
+        <MonoLink href={archiveHref} className="group">
           <ArrowLeft
             size={14}
             className="group-hover:-translate-x-1 transition-transform"
@@ -38,7 +54,7 @@ export default function PostDetailClient({
           <Globe size={14} className="text-ink-muted ml-1" />
           <button
             type="button"
-            onClick={() => setLang("en")}
+            onClick={() => setLanguage("en")}
             className={`font-mono text-xs px-2.5 py-1 rounded-sm transition-colors ${
               lang === "en"
                 ? "bg-accent text-white font-medium"
@@ -49,7 +65,7 @@ export default function PostDetailClient({
           </button>
           <button
             type="button"
-            onClick={() => setLang("id")}
+            onClick={() => setLanguage("id")}
             className={`font-mono text-xs px-2.5 py-1 rounded-sm transition-colors ${
               lang === "id"
                 ? "bg-accent text-white font-medium"
@@ -65,6 +81,15 @@ export default function PostDetailClient({
         <div className="mb-8 p-4 border border-line bg-surface text-xs font-mono text-ink-muted rounded-sm">
           ℹ️ Versi Bahasa Indonesia secara penuh belum tersedia untuk artikel ini. Menampilkan versi Bahasa Inggris.
         </div>
+      )}
+
+      {(post as { coverUrl?: string }).coverUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={(post as { coverUrl?: string }).coverUrl}
+          alt={`Cover ${title}`}
+          className="mb-10 w-full max-h-72 rounded-sm object-cover"
+        />
       )}
 
       <header className="mb-12">

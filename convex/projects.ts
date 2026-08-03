@@ -8,8 +8,9 @@ import {
   optionalHttpUrl,
   requiredText,
 } from "./lib/validation";
-import type { MutationCtx } from "./_generated/server";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { resolveCoverUrl } from "./lib/mediaCover";
 
 // Upper bound for the one-time backfill pass that gives every project an
 // explicit sortOrder. Steady-state reordering only touches two documents.
@@ -47,6 +48,34 @@ function sanitizePublicProjects<T extends { link?: string }>(projects: T[]) {
     ...project,
     link: safePublicLink(project.link),
   }));
+}
+
+/** Ensures a coverMediaId references a valid, project-cover purpose media doc. */
+async function assertProjectCover(
+  ctx: MutationCtx,
+  coverMediaId: Id<"media"> | undefined,
+) {
+  if (coverMediaId === undefined) return;
+  const media = await ctx.db.get("media", coverMediaId);
+  if (!media || media.purpose !== "project-cover") {
+    throw new ConvexError("Selected cover is not a valid project-cover image.");
+  }
+}
+
+/** Returns a project with a public coverUrl attached (and internal id dropped). */
+async function withCover(
+  ctx: MutationCtx | QueryCtx,
+  project: {
+    coverMediaId?: Id<"media">;
+  } & object,
+) {
+  const coverUrl = await resolveCoverUrl(
+    ctx,
+    project.coverMediaId,
+    "project-cover",
+  );
+  const { coverMediaId: _drop, ...rest } = project;
+  return { ...rest, coverUrl };
 }
 
 async function assertSlugAvailable(
@@ -100,10 +129,11 @@ export const listPublished = query({
 
     return {
       ...result,
-      page: result.page.map((project) =>
-        project.isPublished === false
-          ? null
-          : sanitizePublicProjects([project])[0],
+      page: await Promise.all(
+        result.page.map(async (project) => {
+          if (project.isPublished === false) return null;
+          return withCover(ctx, sanitizePublicProjects([project])[0]);
+        }),
       ),
     };
   },
@@ -141,8 +171,25 @@ export const getFeaturedProjects = query({
         .take(6),
     ]);
 
-    return sanitizePublicProjects(
-      manualOrderFirst([...published, ...legacy]).slice(0, 6),
+    let selected = manualOrderFirst([...published, ...legacy]).slice(0, 6);
+
+    // Fallback so the homepage never looks empty: if nothing is explicitly
+    // featured, surface the most recent published projects instead.
+    if (selected.length === 0) {
+      const recent = await ctx.db
+        .query("projects")
+        .withIndex("by_sortOrder")
+        .order("desc")
+        .take(10);
+      selected = recent
+        .filter((project) => project.isPublished !== false)
+        .slice(0, 6);
+    }
+
+    return Promise.all(
+      selected.map((project) =>
+        withCover(ctx, sanitizePublicProjects([project])[0]),
+      ),
     );
   },
 });
@@ -156,11 +203,13 @@ export const addProject = mutation({
     link: v.optional(v.string()),
     slug: v.optional(v.string()),
     caseStudy: v.optional(v.string()),
+    coverMediaId: v.optional(v.id("media")),
     isFeatured: v.optional(v.boolean()),
     isPublished: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    await assertProjectCover(ctx, args.coverMediaId);
     const now = Date.now();
     let slug: string | undefined;
     if (args.slug !== undefined && args.slug.trim() !== "") {
@@ -182,6 +231,7 @@ export const addProject = mutation({
         args.caseStudy !== undefined
           ? limitedText(args.caseStudy, "Case study", 200000)
           : undefined,
+      coverMediaId: args.coverMediaId,
       isFeatured: args.isFeatured ?? false,
       isPublished: args.isPublished ?? true,
       sortOrder: await nextSortOrder(ctx),
@@ -252,12 +302,19 @@ export const updateProject = mutation({
     link: v.optional(v.string()),
     slug: v.optional(v.string()),
     caseStudy: v.optional(v.string()),
+    coverMediaId: v.optional(v.union(v.id("media"), v.null())),
     isFeatured: v.optional(v.boolean()),
     isPublished: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const { id, ...fields } = args;
+    if (fields.coverMediaId === null) {
+      // Explicit clear -> remove any stored cover.
+      fields.coverMediaId = undefined;
+    } else if (fields.coverMediaId !== undefined) {
+      await assertProjectCover(ctx, args.coverMediaId);
+    }
     if (args.title !== undefined) {
       fields.title = requiredText(args.title, "Project title", 160);
     }
@@ -301,6 +358,6 @@ export const getBySlug = query({
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
       .unique();
     if (!project || project.isPublished === false) return null;
-    return sanitizePublicProjects([project])[0];
+    return withCover(ctx, sanitizePublicProjects([project])[0]);
   },
 });

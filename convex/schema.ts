@@ -12,6 +12,7 @@ export default defineSchema({
     link: v.optional(v.string()),
     slug: v.optional(v.string()),
     caseStudy: v.optional(v.string()),
+    coverMediaId: v.optional(v.id("media")),
     isFeatured: v.optional(v.boolean()),
     // Optional during the migration window. Missing means published.
     isPublished: v.optional(v.boolean()),
@@ -77,6 +78,7 @@ export default defineSchema({
     content: v.string(),
     excerpt: v.string(),
     category: v.string(),
+    coverMediaId: v.optional(v.id("media")),
     publishedAt: v.number(),
     isPublished: v.boolean(),
     createdAt: v.optional(v.number()),

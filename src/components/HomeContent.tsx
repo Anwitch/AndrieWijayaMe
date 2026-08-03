@@ -164,6 +164,7 @@ export default function HomeContent({
                       tags={project.tags}
                       link={project.link}
                       slug={project.slug}
+                      coverUrl={(project as { coverUrl?: string }).coverUrl}
                     />
                   ))
                 )}
@@ -281,6 +282,7 @@ function ProjectCardNASA({
   tags,
   link,
   slug,
+  coverUrl,
 }: {
   title: string;
   description: string;
@@ -288,12 +290,21 @@ function ProjectCardNASA({
   tags: string;
   link?: string;
   slug?: string;
+  coverUrl?: string;
 }) {
   const hasTarget = Boolean(slug || link);
   const CardContent = (
     <div
       className={`border-b border-line pb-8 group hover:bg-surface transition-colors px-4 -mx-4 h-full ${hasTarget ? "cursor-pointer" : ""}`}
     >
+      {coverUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={coverUrl}
+          alt={`Cover ${title}`}
+          className="mb-6 h-40 w-full rounded-sm object-cover"
+        />
+      )}
       <Eyebrow>{tags}</Eyebrow>
       <h3 className="text-2xl font-semibold mt-2 group-hover:text-accent transition-colors flex items-baseline justify-between gap-4">
         <span>{title}</span>

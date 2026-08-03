@@ -107,6 +107,15 @@ export default async function ProjectDetailPage({
           Back to Archive
         </MonoLink>
 
+        {project.coverUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={project.coverUrl}
+            alt={`Cover ${project.title}`}
+            className="mb-10 w-full max-h-72 rounded-sm object-cover"
+          />
+        )}
+
         <header className="mb-12">
           <div className="flex items-center gap-4 mb-6">
             <Eyebrow tone="accent">{project.year}</Eyebrow>
