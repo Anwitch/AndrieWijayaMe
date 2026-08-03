@@ -13,6 +13,7 @@ import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as lib_admin from "../lib/admin.js";
 import type * as lib_media from "../lib/media.js";
+import type * as lib_mediaCover from "../lib/mediaCover.js";
 import type * as lib_validation from "../lib/validation.js";
 import type * as media from "../media.js";
 import type * as posts from "../posts.js";
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "lib/admin": typeof lib_admin;
   "lib/media": typeof lib_media;
+  "lib/mediaCover": typeof lib_mediaCover;
   "lib/validation": typeof lib_validation;
   media: typeof media;
   posts: typeof posts;
