@@ -2,6 +2,14 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
 
+export const pressItemValidator = v.object({
+  publisher: v.string(),
+  title: v.string(),
+  url: v.string(),
+  // ISO date (YYYY-MM-DD) the piece was published.
+  date: v.optional(v.string()),
+});
+
 export default defineSchema({
   ...authTables,
   projects: defineTable({
@@ -12,6 +20,8 @@ export default defineSchema({
     link: v.optional(v.string()),
     slug: v.optional(v.string()),
     caseStudy: v.optional(v.string()),
+    // Third-party coverage of the project. Capped at MAX_PRESS_ITEMS on write.
+    press: v.optional(v.array(pressItemValidator)),
     coverMediaId: v.optional(v.id("media")),
     isFeatured: v.optional(v.boolean()),
     // Optional during the migration window. Missing means published.
@@ -29,6 +39,23 @@ export default defineSchema({
     ])
     .index("by_sortOrder", ["sortOrder"])
     .index("by_slug", ["slug"]),
+  experiences: defineTable({
+    title: v.string(),
+    period: v.string(),
+    description: v.string(),
+    role: v.optional(v.string()),
+    capabilities: v.optional(v.string()),
+    base: v.optional(v.string()),
+    // Organisation the experience belongs to; feeds the Person JSON-LD.
+    organization: v.optional(v.string()),
+    // Slug of a related project; links the entry to its case study page.
+    projectSlug: v.optional(v.string()),
+    isPublished: v.boolean(),
+    // Manual display order. Higher sorts first.
+    sortOrder: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_sortOrder", ["sortOrder"]),
   profile: defineTable({
     bio: v.string(),
     tagline: v.string(),

@@ -41,6 +41,39 @@ export function canonicalSlug(value: string) {
   return slug;
 }
 
+export const MAX_PRESS_ITEMS = 20;
+
+export type PressItem = {
+  publisher: string;
+  title: string;
+  url: string;
+  date?: string;
+};
+
+export function normalizePress(items: PressItem[]): PressItem[] {
+  if (items.length > MAX_PRESS_ITEMS) {
+    throw new ConvexError(
+      `A project can list at most ${MAX_PRESS_ITEMS} press items.`,
+    );
+  }
+  return items.map((item) => {
+    const url = optionalHttpUrl(item.url, "Press URL");
+    if (!url) {
+      throw new ConvexError("Press URL is required.");
+    }
+    const date = item.date?.trim();
+    if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      throw new ConvexError("Press date must use the YYYY-MM-DD format.");
+    }
+    return {
+      publisher: requiredText(item.publisher, "Press publisher", 120),
+      title: requiredText(item.title, "Press title", 300),
+      url,
+      ...(date ? { date } : {}),
+    };
+  });
+}
+
 export function optionalHttpUrl(value: string | undefined, label: string) {
   const normalized = value?.trim();
   if (!normalized) return undefined;

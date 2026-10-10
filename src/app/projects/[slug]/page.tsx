@@ -9,7 +9,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/site-settings.server";
 import { SITE_URL } from "@/lib/site-url";
-import { breadcrumbSchema } from "@/lib/structured-data";
+import { breadcrumbSchema, pressSchemas } from "@/lib/structured-data";
 
 async function getProject(slug: string) {
   try {
@@ -67,6 +67,7 @@ export default async function ProjectDetailPage({
   }
 
   const url = `${SITE_URL}/projects/${slug}`;
+  const press = project.press ?? [];
   const breadcrumb = breadcrumbSchema([
     { name: "Beranda", path: "/" },
     { name: "Projects", path: "/projects" },
@@ -87,7 +88,12 @@ export default async function ProjectDetailPage({
     image: `${SITE_URL}/opengraph-image`,
     author: { "@id": `${SITE_URL}/#person` },
     publisher: { "@id": `${SITE_URL}/#person` },
-    about: { "@type": "SoftwareApplication", name: project.title },
+    about: {
+      "@type": "SoftwareApplication",
+      name: project.title,
+      contributor: { "@id": `${SITE_URL}/#person` },
+      ...(press.length > 0 ? { subjectOf: pressSchemas(press) } : {}),
+    },
   };
 
   return (
@@ -161,6 +167,34 @@ export default async function ProjectDetailPage({
               {project.caseStudy}
             </ReactMarkdown>
           </article>
+        )}
+
+        {press.length > 0 && (
+          <section className="mt-16">
+            <Eyebrow as="h2" className="block mb-6">
+              Liputan Media
+            </Eyebrow>
+            <ul className="space-y-5">
+              {press.map((item) => (
+                <li key={item.url}>
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block"
+                  >
+                    <span className="text-lg text-ink group-hover:text-accent transition-colors">
+                      {item.title}
+                    </span>
+                    <span className="mt-1 block font-mono text-xs uppercase tracking-widest text-ink-muted">
+                      {item.publisher}
+                      {item.date && ` · ${item.date}`}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         <section className="mt-24 pt-12 border-t border-line">

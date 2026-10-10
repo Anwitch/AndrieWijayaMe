@@ -26,6 +26,11 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { getErrorMessage } from "@/lib/errors";
+import {
+  PRESS_PLACEHOLDER,
+  formatPressText,
+  parsePressText,
+} from "@/lib/press";
 import CoverPicker from "./CoverPicker";
 
 interface ProjectManagerProps {
@@ -42,6 +47,7 @@ const emptyProjectForm = {
   link: "",
   slug: "",
   caseStudy: "",
+  pressText: "",
   coverMediaId: undefined as Id<"media"> | undefined,
 };
 
@@ -75,6 +81,7 @@ export default function ProjectManager({
       link: project.link ?? "",
       slug: project.slug ?? "",
       caseStudy: project.caseStudy ?? "",
+      pressText: formatPressText(project.press),
       coverMediaId: project.coverMediaId ?? undefined,
     });
   };
@@ -114,6 +121,14 @@ export default function ProjectManager({
       return;
     }
 
+    let press;
+    try {
+      press = parsePressText(editFormData.pressText);
+    } catch (parseError) {
+      setError(getErrorMessage(parseError, "Press list is invalid."));
+      return;
+    }
+
     void runAction(
       `save-${editingProjectId}`,
       () =>
@@ -126,6 +141,7 @@ export default function ProjectManager({
           link: editFormData.link.trim(),
           slug: editFormData.slug.trim(),
           caseStudy: editFormData.caseStudy.trim(),
+          press,
           coverMediaId: editFormData.coverMediaId ?? null,
         }),
       () => setEditingProjectId(null),
@@ -279,6 +295,19 @@ export default function ProjectManager({
                             }
                             className={`${editInputClass} text-xs min-h-[120px] font-mono`}
                             placeholder="Case study (Markdown)"
+                          />
+                          <textarea
+                            aria-label="Project press coverage"
+                            value={editFormData.pressText}
+                            disabled={isSaving}
+                            onChange={(event) =>
+                              setEditFormData({
+                                ...editFormData,
+                                pressText: event.target.value,
+                              })
+                            }
+                            className={`${editInputClass} text-xs min-h-[60px] font-mono`}
+                            placeholder={`Press, one per line: ${PRESS_PLACEHOLDER}`}
                           />
                           <CoverPicker
                             purpose="project-cover"

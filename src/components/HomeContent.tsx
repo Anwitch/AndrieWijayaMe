@@ -16,6 +16,7 @@ import {
 import { usePreloadedQuery, useQuery } from "convex/react";
 import type { Preloaded } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import type { Doc } from "../../convex/_generated/dataModel";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -29,8 +30,10 @@ const NAV_ITEMS = [
 
 export default function HomeContent({
   preloadedProfile,
+  experiences,
 }: {
   preloadedProfile: Preloaded<typeof api.profile.get>;
+  experiences: Doc<"experiences">[];
 }) {
   const projects = useQuery(api.projects.getFeaturedProjects);
   const profile = usePreloadedQuery(preloadedProfile);
@@ -266,6 +269,60 @@ export default function HomeContent({
                     </div>
                   </div>
                 </div>
+
+                {experiences.map((experience) => {
+                  const facts = [
+                    { label: "PERAN", value: experience.role },
+                    { label: "KAPABILITAS", value: experience.capabilities },
+                    { label: "BASIS", value: experience.base },
+                  ].filter((fact) => fact.value);
+                  return (
+                    <div
+                      key={experience._id}
+                      className="border-b border-line pb-8"
+                    >
+                      <div className="flex flex-col md:flex-row justify-between md:items-baseline gap-2 mb-3">
+                        <h3 className="text-2xl font-semibold text-ink">
+                          {experience.title}
+                        </h3>
+                        <span className="font-mono text-sm text-ink-muted">
+                          {experience.period}
+                        </span>
+                      </div>
+                      <p className="text-lg text-ink-secondary leading-relaxed max-w-prose mb-6">
+                        {experience.description}
+                      </p>
+                      {facts.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-line">
+                          {facts.map((fact) => (
+                            <div
+                              key={fact.label}
+                              className="flex flex-col gap-1"
+                            >
+                              <Eyebrow tone="muted">{fact.label}</Eyebrow>
+                              <span className="text-base text-ink font-medium">
+                                {fact.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {experience.projectSlug && (
+                        <div className="mt-6">
+                          <MonoLink
+                            href={`/projects/${experience.projectSlug}`}
+                            className="group"
+                          >
+                            Studi Kasus{" "}
+                            <span className="group-hover:translate-x-1 transition-transform">
+                              →
+                            </span>
+                          </MonoLink>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </section>
           </article>

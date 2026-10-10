@@ -83,3 +83,49 @@ export function webSiteSchema(settings: SiteSettings) {
     publisher: { "@id": `${SITE_URL}/#person` },
   };
 }
+
+export type PressItem = {
+  publisher: string;
+  title: string;
+  url: string;
+  date?: string;
+};
+
+/** schema.org NewsArticle nodes for third-party coverage of a project. */
+export function pressSchemas(press: PressItem[] = []) {
+  return press.map((item) => ({
+    "@type": "NewsArticle",
+    headline: item.title,
+    url: item.url,
+    ...(item.date ? { datePublished: item.date } : {}),
+    publisher: { "@type": "Organization", name: item.publisher },
+  }));
+}
+
+/**
+ * Extends the site-wide Person (same @id, so engines merge the nodes) with the
+ * published experience entries, expressed as schema.org roles.
+ */
+export function personExperienceSchema(
+  experiences: Array<{
+    title: string;
+    description: string;
+    role?: string;
+    organization?: string;
+  }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": `${SITE_URL}/#person`,
+    memberOf: experiences.map((experience) => ({
+      "@type": "OrganizationRole",
+      ...(experience.role ? { roleName: experience.role } : {}),
+      description: experience.description,
+      memberOf: {
+        "@type": "Organization",
+        name: experience.organization ?? experience.title,
+      },
+    })),
+  };
+}

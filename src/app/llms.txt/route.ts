@@ -33,6 +33,7 @@ export async function GET() {
   }
 
   let projectLines = "";
+  let pressLines = "";
   try {
     const projects = await fetchQuery(api.projects.listPublished, {
       paginationOpts: { numItems: 50, cursor: null },
@@ -43,6 +44,28 @@ export async function GET() {
         project.slug
           ? `- [${project.title}](${SITE_URL}/projects/${project.slug}): ${project.description}`
           : `- ${project.title}: ${project.description}`,
+      )
+      .join("\n");
+    pressLines = projects.page
+      .filter((project) => project !== null)
+      .flatMap((project) =>
+        (project.press ?? []).map(
+          (item) =>
+            `- [${item.publisher}](${item.url}): ${item.title} (tentang ${project.title})`,
+        ),
+      )
+      .join("\n");
+  } catch {
+    // Convex unreachable — section stays empty.
+  }
+
+  let experienceLines = "";
+  try {
+    const experiences = await fetchQuery(api.experiences.listPublished, {});
+    experienceLines = experiences
+      .map(
+        (experience) =>
+          `- ${experience.title} (${experience.period}): ${experience.description}`,
       )
       .join("\n");
   } catch {
@@ -69,7 +92,7 @@ ${settings.siteName} (alias Anwitch) adalah product thinker dan problem solver y
 
 ${projectLines || "- (belum ada)"}
 
-## Tulisan
+${experienceLines ? `## Pengalaman\n\n${experienceLines}\n\n` : ""}${pressLines ? `## Liputan Media\n\n${pressLines}\n\n` : ""}## Tulisan
 
 ${postLines || "- (belum ada)"}
 

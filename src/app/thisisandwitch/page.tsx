@@ -10,6 +10,7 @@ import AddPostForm from "@/components/AddPostForm";
 import AddProjectForm from "@/components/AddProjectForm";
 import PostManager from "@/components/mission-control/PostManager";
 import ProfilePanel from "@/components/mission-control/ProfilePanel";
+import ExperienceManager from "@/components/mission-control/ExperienceManager";
 import ProjectManager from "@/components/mission-control/ProjectManager";
 import SiteSettingsPanel from "@/components/mission-control/SiteSettingsPanel";
 import MediaManager from "@/components/mission-control/MediaManager";
@@ -111,6 +112,7 @@ function MissionControlContent() {
             status={projectStatus}
             onLoadMore={() => loadMoreProjects(50)}
           />
+          <ExperienceManager />
           <PostManager
             posts={postStatus === "LoadingFirstPage" ? undefined : posts}
             status={postStatus}

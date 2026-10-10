@@ -5,12 +5,15 @@ import { requireAdmin } from "./lib/admin";
 import {
   canonicalSlug,
   limitedText,
+  normalizePress,
   optionalHttpUrl,
   requiredText,
 } from "./lib/validation";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { resolveCoverUrl } from "./lib/mediaCover";
+import type { PressItem } from "./lib/validation";
+import { pressItemValidator } from "./schema";
 
 // Upper bound for the one-time backfill pass that gives every project an
 // explicit sortOrder. Steady-state reordering only touches two documents.
@@ -201,6 +204,7 @@ export const addProject = mutation({
     link: v.optional(v.string()),
     slug: v.optional(v.string()),
     caseStudy: v.optional(v.string()),
+    press: v.optional(v.array(pressItemValidator)),
     coverMediaId: v.optional(v.id("media")),
     isFeatured: v.optional(v.boolean()),
     isPublished: v.optional(v.boolean()),
@@ -228,6 +232,10 @@ export const addProject = mutation({
       caseStudy:
         args.caseStudy !== undefined
           ? limitedText(args.caseStudy, "Case study", 200000)
+          : undefined,
+      press:
+        args.press !== undefined && args.press.length > 0
+          ? normalizePress(args.press)
           : undefined,
       coverMediaId: args.coverMediaId,
       isFeatured: args.isFeatured ?? false,
@@ -300,6 +308,7 @@ export const updateProject = mutation({
     link: v.optional(v.string()),
     slug: v.optional(v.string()),
     caseStudy: v.optional(v.string()),
+    press: v.optional(v.array(pressItemValidator)),
     coverMediaId: v.optional(v.union(v.id("media"), v.null())),
     isFeatured: v.optional(v.boolean()),
     isPublished: v.optional(v.boolean()),
@@ -318,6 +327,7 @@ export const updateProject = mutation({
       link?: string;
       slug?: string;
       caseStudy?: string;
+      press?: PressItem[];
       coverMediaId?: Id<"media">;
       isFeatured?: boolean;
       isPublished?: boolean;
@@ -352,6 +362,11 @@ export const updateProject = mutation({
     }
     if (args.caseStudy !== undefined) {
       fields.caseStudy = limitedText(args.caseStudy, "Case study", 200000);
+    }
+    if (args.press !== undefined) {
+      // An empty list clears the field.
+      fields.press =
+        args.press.length > 0 ? normalizePress(args.press) : undefined;
     }
     if (args.isFeatured !== undefined) {
       fields.isFeatured = args.isFeatured;

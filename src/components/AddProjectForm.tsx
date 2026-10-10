@@ -11,6 +11,7 @@ import {
   labelClass,
 } from "@/components/ui";
 import { getErrorMessage } from "@/lib/errors";
+import { PRESS_PLACEHOLDER, parsePressText } from "@/lib/press";
 
 export default function AddProjectForm() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,6 +22,7 @@ export default function AddProjectForm() {
   const [link, setLink] = useState("");
   const [slug, setSlug] = useState("");
   const [caseStudy, setCaseStudy] = useState("");
+  const [pressText, setPressText] = useState("");
   const [isPublished, setIsPublished] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +38,14 @@ export default function AddProjectForm() {
       return;
     }
 
+    let press;
+    try {
+      press = parsePressText(pressText);
+    } catch (parseError) {
+      setError(getErrorMessage(parseError, "Press list is invalid."));
+      return;
+    }
+
     setError(null);
     setIsSubmitting(true);
     try {
@@ -47,6 +57,7 @@ export default function AddProjectForm() {
         link: link.trim() || undefined,
         slug: slug.trim() || undefined,
         caseStudy: caseStudy.trim() || undefined,
+        press: press.length > 0 ? press : undefined,
         isPublished,
       });
       setTitle("");
@@ -56,6 +67,7 @@ export default function AddProjectForm() {
       setLink("");
       setSlug("");
       setCaseStudy("");
+      setPressText("");
       setIsPublished(true);
       setIsOpen(false);
     } catch (submitError) {
@@ -210,6 +222,20 @@ export default function AddProjectForm() {
             onChange={(e) => setCaseStudy(e.target.value)}
             className={`${inputUnderlineClass} min-h-[160px] resize-y font-mono text-xs`}
             placeholder="## Masalah&#10;...&#10;&#10;## Yang Saya Rancang&#10;..."
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="project-press" className={labelClass}>
+            Press Coverage (Optional, one per line)
+          </label>
+          <textarea
+            id="project-press"
+            disabled={isSubmitting}
+            value={pressText}
+            onChange={(e) => setPressText(e.target.value)}
+            className={`${inputUnderlineClass} min-h-[80px] resize-y font-mono text-xs`}
+            placeholder={PRESS_PLACEHOLDER}
           />
         </div>
 

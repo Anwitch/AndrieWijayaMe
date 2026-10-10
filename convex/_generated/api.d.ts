@@ -10,6 +10,7 @@
 
 import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
+import type * as experiences from "../experiences.js";
 import type * as http from "../http.js";
 import type * as lib_admin from "../lib/admin.js";
 import type * as lib_media from "../lib/media.js";
@@ -19,6 +20,7 @@ import type * as media from "../media.js";
 import type * as posts from "../posts.js";
 import type * as profile from "../profile.js";
 import type * as projects from "../projects.js";
+import type * as seedAterostop from "../seedAterostop.js";
 import type * as seedEntity from "../seedEntity.js";
 import type * as siteSettings from "../siteSettings.js";
 
@@ -31,6 +33,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   auth: typeof auth;
+  experiences: typeof experiences;
   http: typeof http;
   "lib/admin": typeof lib_admin;
   "lib/media": typeof lib_media;
@@ -40,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   posts: typeof posts;
   profile: typeof profile;
   projects: typeof projects;
+  seedAterostop: typeof seedAterostop;
   seedEntity: typeof seedEntity;
   siteSettings: typeof siteSettings;
 }>;
