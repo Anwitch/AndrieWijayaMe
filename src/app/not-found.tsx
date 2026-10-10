@@ -8,7 +8,7 @@ export default function NotFound() {
       <main className="max-w-3xl mx-auto px-6 py-16 md:py-24 text-center animate-fade-in-up">
         <div className="mb-10 flex justify-center text-ink">
           <div className="witch-bob">
-            <PixelWitchSprite size={96} />
+            <PixelWitchSprite size={120} />
           </div>
         </div>
         <Eyebrow tone="accent" className="mb-4 block">

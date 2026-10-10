@@ -54,9 +54,9 @@ const AMBIENT_MIN_MS = 3 * 60 * 1000;
 const AMBIENT_MAX_MS = 5 * 60 * 1000;
 const AWAY_PAUSE_MS = 1500;
 
-/* Offsets that seat the mounted sprite (44px wide, flipped) on the anchor. */
-const SPRITE_OFFSET_X = -26;
-const SPRITE_OFFSET_Y = -26;
+/* Offsets that seat the mounted sprite (60x42px) on the anchor. */
+const SPRITE_OFFSET_X = -30;
+const SPRITE_OFFSET_Y = -38;
 
 export function WitchProvider({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<WitchPhase>("home");

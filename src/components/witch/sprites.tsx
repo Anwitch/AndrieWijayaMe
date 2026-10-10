@@ -1,105 +1,149 @@
 /*
  * Pixel sprite maps for the witch world. Each sprite is a string grid:
- *   "X" = silhouette pixel (currentColor / ink)
- *   "O" = glow pixel (accent — fire, window light, owl eyes)
+ *   "X" = ink pixel (currentColor)
+ *   "W" = paper pixel (opaque — face, laptop lid)
+ *   "O" = glow pixel (accent — fire, window light, glasses, lanterns)
  *   "." = empty
  * Rendered as 1x1 SVG rects so everything follows the design tokens and
- * needs no image assets.
+ * needs no image assets. Sprites are drawn for 2px per grid pixel.
  */
 
 export type SpriteMap = string[];
 
-/* Witch riding the broom (used for flights, takeoff/landing, 404). */
+/* The witch on her broom, laptop on her lap (flights, 404). Faces right. */
 export const WITCH_FLY_A: SpriteMap = [
-  ".............X..........",
-  "............XX..........",
-  "............XXX.........",
-  "...........XXXX.........",
-  ".........XXXXXXXXX......",
-  "...........XXXX.........",
-  "...........XXXX.........",
-  "..........XXXXX.........",
-  ".......X..XXXXXX........",
-  "......XX.XXXXXXXX.......",
-  ".....XXXXXXXXXX.XX......",
-  "..XXXXXXXXXXXXXXXXXXXX..",
-  ".XXXX.......XXX.........",
-  ".XXX........XX.X........",
-  "..X..........X..........",
-  "........................",
+  "..........XXX.................",
+  ".........XXXXXX...............",
+  ".........XX.XXXXX.............",
+  "............XXXXXX............",
+  "...........XXXXXXXX...........",
+  "...........XXXXOXXXX..........",
+  "......XXXXXXXXXXXXXXXXXX......",
+  "........XXXXXXXXXXXXXXX.......",
+  "..........XXXXXXXXXX..........",
+  "..........XXXXWXXWXX..........",
+  "..........XXXWOOXOOX..........",
+  "..........XXXWWWWWWX..........",
+  "...........XXXWWWWX...........",
+  "....X......XXXXXXX............",
+  "...XXX....XXXXXXXXX..XXXXX....",
+  "..XXXXXX.XXXXXXXXXXX.XWWWX....",
+  ".XXXXXXXXXXXXXXXXXXXXXWOWX....",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "XXXXXXX.....XXXX..............",
+  ".XXXXX......XXX.X.............",
+  "..XXX........X................",
 ];
 
 export const WITCH_FLY_B: SpriteMap = [
-  ".............X..........",
-  "............XX..........",
-  "............XXX.........",
-  "...........XXXX.........",
-  ".........XXXXXXXXX......",
-  "...........XXXX.........",
-  "...........XXXX.........",
-  "..........XXXXX.........",
-  "......XX..XXXXXX........",
-  ".......X.XXXXXXXX.......",
-  ".....XXXXXXXXXX.XX......",
-  "..XXXXXXXXXXXXXXXXXXXX..",
-  ".XXXXX......XXX.........",
-  "..XX........XX.X........",
-  ".X...........X..........",
-  "........................",
+  "..........XXX.................",
+  ".........XXXXXX...............",
+  ".........XX.XXXXX.............",
+  "............XXXXXX............",
+  "...........XXXXXXXX...........",
+  "...........XXXXOXXXX..........",
+  "......XXXXXXXXXXXXXXXXXX......",
+  "........XXXXXXXXXXXXXXX.......",
+  "..........XXXXXXXXXX..........",
+  "..........XXXXWXXWXX..........",
+  "..........XXXWOOXOOX..........",
+  "..........XXXWWWWWWX..........",
+  "...........XXXWWWWX...........",
+  "...XX......XXXXXXX............",
+  "....XXX...XXXXXXXXX..XXXXX....",
+  "..XXXXXX.XXXXXXXXXXX.XWWWX....",
+  ".XXXXXXXXXXXXXXXXXXXXXWOWX....",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  ".XXXXXXX....XXXX..............",
+  "XXXXXX......XXX.X.............",
+  ".XXX.........X................",
 ];
 
-/* Witch on foot (no broom), two walk frames. */
+/* The witch on foot, laptop under her arm. Two walk frames. */
 export const WITCH_STAND_A: SpriteMap = [
-  ".....X....",
-  "....XX....",
-  "....XXX...",
-  "...XXXX...",
-  ".XXXXXXXX.",
-  "....XXX...",
-  "...XXXX...",
-  "...XXXX...",
-  "..XXXXX...",
-  "..XXXXXX..",
-  ".XXXXXXX..",
-  ".XXXXXXXX.",
-  "...X..X...",
-  "...X..X...",
+  "...XXX..........",
+  "..XXXXXX........",
+  "..XX.XXXXX......",
+  ".....XXXXXX.....",
+  "....XXXXXXXX....",
+  "....XXXOXXXX....",
+  "XXXXXXXXXXXXXXXX",
+  ".XXXXXXXXXXXXXX.",
+  "...XXXXXXXXXX...",
+  "...XXWXXWWXWX...",
+  "...XWOOXXOOWX...",
+  "...XWOOXXOOWX...",
+  "....XWWWWWWX....",
+  "....XXWWWWXX....",
+  "...XXXXXXXXXX...",
+  "..XXXXXOXXXXXX..",
+  "..XXXXXXXXXXXXXX",
+  ".XXXXXXXXXXXWWWX",
+  ".XXXXXXXXXXXWOWX",
+  ".XXXXXXXXXXXXXXX",
+  "..XXXXXXXXXXXX..",
+  "....XX....XX....",
+  "....XX....XX....",
 ];
 
 export const WITCH_STAND_B: SpriteMap = [
-  ".....X....",
-  "....XX....",
-  "....XXX...",
-  "...XXXX...",
-  ".XXXXXXXX.",
-  "....XXX...",
-  "...XXXX...",
-  "...XXXX...",
-  "..XXXXX...",
-  "..XXXXXX..",
-  ".XXXXXXX..",
-  ".XXXXXXXX.",
-  "..X....X..",
-  "..X....X..",
+  "...XXX..........",
+  "..XXXXXX........",
+  "..XX.XXXXX......",
+  ".....XXXXXX.....",
+  "....XXXXXXXX....",
+  "....XXXOXXXX....",
+  "XXXXXXXXXXXXXXXX",
+  ".XXXXXXXXXXXXXX.",
+  "...XXXXXXXXXX...",
+  "...XXWXXWWXWX...",
+  "...XWOOXXOOWX...",
+  "...XWOOXXOOWX...",
+  "....XWWWWWWX....",
+  "....XXWWWWXX....",
+  "...XXXXXXXXXX...",
+  "..XXXXXOXXXXXX..",
+  "..XXXXXXXXXXXXXX",
+  ".XXXXXXXXXXXWWWX",
+  ".XXXXXXXXXXXWOWX",
+  ".XXXXXXXXXXXXXXX",
+  "..XXXXXXXXXXXX..",
+  "...XX......XX...",
+  "...XX......XX...",
 ];
 
-/* The hut: chimney, glowing window (O), door. */
+/* The hut: crooked roof, chimney, glowing round window (O), arched door. */
 export const HUT: SpriteMap = [
-  "..........XXXX..........",
-  ".....XX..XXXXXX.........",
-  ".....XX.XX....XX........",
-  ".....XXXX......XX.......",
-  "....XX..........XX......",
-  "...XX............XX.....",
-  "..XX..............XX....",
-  ".XXXXXXXXXXXXXXXXXXXX...",
-  ".X..................X...",
-  ".X..XXXX......XXXX..X...",
-  ".X..XOOX......X..X..X...",
-  ".X..XOOX......X..X..X...",
-  ".X..XXXX......X..X..X...",
-  ".X............X..X..X...",
-  ".XXXXXXXXXXXXXXXXXXX....",
+  ".............XX.........................",
+  "..............XXX.......................",
+  "...............XXXXX........XXXXXX......",
+  "..............XX....XXX......X..X.......",
+  ".............XX.......XXX....X..X.......",
+  "............XX..........XXX..X..X.......",
+  "...........XX..XX..XX..XX.XXXX..X.......",
+  "..........XX................XX..X.......",
+  "........XX....................XX........",
+  ".......XX......................XX.......",
+  "......XX..XX..XX..XX..XX..XX....XX......",
+  ".....XX..........................XX.....",
+  "....XX............................XX....",
+  "..XX................................XX..",
+  ".XX..................................XX.",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "...X................................X...",
+  "...X................................X...",
+  "...X.....XXXX..........XXXXXX.......X...",
+  "...X....XOOOOX........X......X......X...",
+  "...X....XOOOOX........X......X......X...",
+  "...X....XOOOOX........X......X......X...",
+  "...X....XOOOOX........X......X......X...",
+  "...X.....XXXX.........X......X......X...",
+  "...X..................X....X.X......X...",
+  "...X..................X......X......X...",
+  "...X..................X......X......X...",
+  "...X..................X......X......X...",
+  "...X..................X......X......X...",
+  "...XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...",
 ];
 
 /* Owl with glowing eyes (O). */
@@ -161,6 +205,115 @@ export const BROOM_LEAN: SpriteMap = [
   "X....",
 ];
 
+/* Crescent moon and sparkles for the sky above the hut. */
+export const MOON: SpriteMap = [
+  "..XXX...",
+  ".XXX....",
+  "XXX.....",
+  "XXX.....",
+  "XXX.....",
+  "XXXX...X",
+  ".XXXXXX.",
+  "..XXXX..",
+];
+
+export const SPARKLE: SpriteMap = [
+  "..X..",
+  "..X..",
+  "XX.XX",
+  "..X..",
+  "..X..",
+];
+
+export const SPARKLE_GLOW: SpriteMap = [
+  "..O..",
+  "..O..",
+  "OO.OO",
+  "..O..",
+  "..O..",
+];
+
+export const SPARKLE_SMALL: SpriteMap = [
+  ".X.",
+  "X.X",
+  ".X.",
+];
+
+/* The grove: a bare crooked tree with a lantern (O) hung from a branch. */
+export const TREE: SpriteMap = [
+  "......X......X........",
+  ".......X....X...X.....",
+  "..X....X...XX..X......",
+  "...X...XX..X..X.......",
+  "....XX..XX.X.XX.......",
+  "......X..XXXXX....X...",
+  ".......XX.XXX....X....",
+  ".........XXXX..XX.....",
+  "X.........XXXXXX......",
+  ".XX.......XXX.........",
+  "...XXX....XXX.........",
+  "......XXXXXXX.........",
+  ".....X....XXX.........",
+  ".....X....XXX.........",
+  "....XXX...XXX.........",
+  "....XOX...XXXX........",
+  "....XOX...XXXX........",
+  "....XXX...XXXX........",
+  "..........XXXX........",
+  "..........XXXX........",
+  "..........XXXX........",
+  ".........XXXXX........",
+  ".........XXXXX........",
+  ".........XXXXX........",
+  ".........XXXXXX.......",
+  "........XXXXXXX.......",
+  "........XXXXXXX.......",
+  ".......XXXXXXXXX......",
+  ".....XXXX.XXX.XXXX....",
+];
+
+/* Her outdoor desk: open laptop (O screen), mug, and a stool. */
+export const DESK: SpriteMap = [
+  "......XXXXXXXX..........",
+  "......XOOOOOOX..........",
+  "......XOOOOOOX..........",
+  "......XOOOOOOX....XXX.X.",
+  "......XXXXXXXX....XXXXX.",
+  "....XXXXXXXXXXXX..XXX...",
+  "XXXXXXXXXXXXXXXXXXXXXXXX",
+  ".XX..................XX.",
+  ".XX..................XX.",
+  ".XX......XXXXXX......XX.",
+  ".XX.......X..X.......XX.",
+  ".XX.......X..X.......XX.",
+  ".XX.......X..X.......XX.",
+];
+
+/* Bat, two wing frames. */
+export const BAT_A: SpriteMap = [
+  "X..X.X..X",
+  "XX.XXX.XX",
+  ".XXXXXXX.",
+  "...XXX...",
+];
+
+export const BAT_B: SpriteMap = [
+  "...X.X...",
+  ".XXXXXXX.",
+  "XXXXXXXXX",
+  "X.X...X.X",
+];
+
+/* Mushrooms with glowing spots (O). */
+export const MUSHROOMS: SpriteMap = [
+  ".....XXXX.",
+  "....XOXXOX",
+  ".X..XXXXXX",
+  "XOX...XX..",
+  ".X....XX..",
+  ".X....XX..",
+];
+
 /* ------------------------------------------------------------- renderers */
 
 function mapToRects(map: SpriteMap, char: string) {
@@ -190,6 +343,7 @@ export function PixelSprite({
   const cols = map[0].length;
   const rows = map.length;
   const ink = mapToRects(map, "X");
+  const paper = mapToRects(map, "W");
   const glow = mapToRects(map, "O");
   return (
     <svg
@@ -203,6 +357,13 @@ export function PixelSprite({
         transform: flip ? "scaleX(-1)" : undefined,
       }}
     >
+      {paper.length > 0 && (
+        <g fill="var(--color-paper)">
+          {paper.map(({ x, y }) => (
+            <rect key={`p-${x}-${y}`} x={x} y={y} width={1} height={1} />
+          ))}
+        </g>
+      )}
       <g>
         {ink.map(({ x, y }) => (
           <rect key={`i-${x}-${y}`} x={x} y={y} width={1} height={1} fill="currentColor" />
@@ -251,9 +412,9 @@ export function AnimatedSprite({
   );
 }
 
-/** The classic flying witch (kept for the flight overlay and 404 page). */
+/** The flying witch (flight overlay and 404 page). */
 export function PixelWitchSprite({
-  size = 48,
+  size = 60,
   flip = false,
   animate = true,
   className = "",
