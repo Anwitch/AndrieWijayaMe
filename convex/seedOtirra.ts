@@ -1,6 +1,10 @@
-import { internalMutation } from "./_generated/server";
+import { v } from "convex/values";
+import { internal } from "./_generated/api";
+import { internalAction, internalMutation } from "./_generated/server";
+import { getStorageImageError } from "./lib/media";
 
 const SLUG = "otirra";
+const COVER_URL = "https://anwitch.me/images/otirra/tim-lipra.webp";
 
 const PROJECT = {
   title: "Otirra",
@@ -28,6 +32,8 @@ Skrining pendengaran bayi baru lahir termasuk program Kementerian Kesehatan, tap
 
 Hambatannya ada di alat. Alat OAE di e-Katalog pemerintah adalah produk impor seharga sekitar Rp126 juta dengan TKDN 0%. Dokter THT di Asia Tenggara juga hanya 1,12 per 100.000 penduduk, jadi hasil skrining perlu otomatis supaya bisa dioperasikan tenaga kesehatan non-spesialis di puskesmas.
 
+![Pitching Otirra dibuka dengan masalah skrining pendengaran bayi](/images/otirra/pitching-masalah.webp)
+
 ## Yang Kami Bangun
 
 Otirra adalah satu inti digital yang menjalankan dua metode skrining:
@@ -42,7 +48,11 @@ Kedua mode berbagi blok pewaktuan stimulus, penolakan artefak, perata-rataan, da
 - **Perata-rataan A/B bergantian.** A+B berisi sinyal dan derau, A−B hanya derau, sehingga derau terukur langsung tanpa sensor tambahan.
 - **Hanya bilangan bulat, tanpa pembagi.** Syarat SNR 6 dB dihitung sebagai satu perkalian silang, tanpa pembagian, logaritma, atau akar.
 
+![Menjelaskan empat keputusan desain inti Otirra di Demo Day](/images/otirra/pitching-desain.webp)
+
 Proyek ini dikerjakan tim Lipra, lima mahasiswa Teknik Elektro dan Teknik Informatika Universitas Tanjungpura, di Hackathon Deeptech 2026: Indonesia Chip Hackathon Challenge yang diselenggarakan Indonesia Chip Design Collaborative Center (ICDeC) dan Pusat Mikroelektronika ITB bersama Kemdiktisaintek. Proposalnya lolos sebagai salah satu dari 15 tim finalis nasional, dan prototipenya kami bangun dalam tiga hari di ITB Innovation Park, Bandung, 21–23 Oktober 2026.
+
+![Tim Lipra bekerja di meja kelompok T09](/images/otirra/meja-t09.webp)
 
 ## Bagianku
 
@@ -63,6 +73,8 @@ Diukur di board AMD Kria KV260 pada 100 MHz:
 - 514 clock per sampel tiga kanal, 13× lebih sedikit dari ARM, dan hanya memakai 6 dari 1.248 multiplier (0,5%).
 
 Data uji berasal dari rekaman orang dewasa di PhysioNet, jadi angka di atas menguji algoritma dan hardware-nya, bukan klaim klinis. Langkah berikutnya adalah ethical clearance dan pengambilan data bayi bersama rumah sakit mitra.
+
+![Peserta dan panitia Hackathon Deeptech 2026](/images/otirra/peserta-hackathon.webp)
 
 ## Teknologi
 
@@ -132,5 +144,75 @@ export const apply = internalMutation({
     }
 
     return summary;
+  },
+});
+
+/**
+ * Sets the Otirra cover from a published image. Run via
+ * `npx convex run seedOtirra:setCover [--prod]` after the image is live on
+ * the site. Skips when the project already has a cover.
+ */
+export const setCover = internalAction({
+  args: { url: v.optional(v.string()) },
+  handler: async (ctx, args): Promise<string> => {
+    const url = args.url ?? COVER_URL;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Fetching ${url} failed with ${response.status}.`);
+    }
+    const storageId = await ctx.storage.store(await response.blob());
+    const result: string = await ctx.runMutation(
+      internal.seedOtirra.attachCover,
+      { storageId, originalName: url.split("/").pop() ?? "cover.webp" },
+    );
+    return result;
+  },
+});
+
+export const attachCover = internalMutation({
+  args: { storageId: v.id("_storage"), originalName: v.string() },
+  handler: async (ctx, args): Promise<string> => {
+    const project = await ctx.db
+      .query("projects")
+      .withIndex("by_slug", (q) => q.eq("slug", SLUG))
+      .unique();
+    if (!project || project.coverMediaId) {
+      await ctx.storage.delete(args.storageId);
+      return project
+        ? "skipped: project already has a cover"
+        : "skipped: run seedOtirra:apply first";
+    }
+
+    const metadata = await ctx.db.system.get("_storage", args.storageId);
+    const imageError = metadata ? getStorageImageError(metadata) : "missing";
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+    const admin = adminEmail
+      ? await ctx.db
+          .query("users")
+          .withIndex("email", (q) => q.eq("email", adminEmail))
+          .first()
+      : null;
+    if (!metadata || imageError || !admin) {
+      await ctx.storage.delete(args.storageId);
+      throw new Error(imageError ?? "Admin user not found (ADMIN_EMAIL).");
+    }
+
+    const now = Date.now();
+    const mediaId = await ctx.db.insert("media", {
+      storageId: args.storageId,
+      originalName: args.originalName,
+      contentType: metadata.contentType!.toLowerCase(),
+      size: metadata.size,
+      purpose: "project-cover",
+      altText: "Tim Lipra di Hackathon Deeptech 2026",
+      uploadedBy: admin._id,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await ctx.db.patch("projects", project._id, {
+      coverMediaId: mediaId,
+      updatedAt: now,
+    });
+    return "cover set";
   },
 });
