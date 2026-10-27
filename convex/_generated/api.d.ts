@@ -22,6 +22,7 @@ import type * as profile from "../profile.js";
 import type * as projects from "../projects.js";
 import type * as seedAterostop from "../seedAterostop.js";
 import type * as seedEntity from "../seedEntity.js";
+import type * as seedMousePointer from "../seedMousePointer.js";
 import type * as seedOtirra from "../seedOtirra.js";
 import type * as siteSettings from "../siteSettings.js";
 
@@ -46,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   projects: typeof projects;
   seedAterostop: typeof seedAterostop;
   seedEntity: typeof seedEntity;
+  seedMousePointer: typeof seedMousePointer;
   seedOtirra: typeof seedOtirra;
   siteSettings: typeof siteSettings;
 }>;
