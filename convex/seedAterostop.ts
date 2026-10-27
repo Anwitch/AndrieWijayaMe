@@ -1,7 +1,11 @@
-import { internalMutation } from "./_generated/server";
+import { v } from "convex/values";
+import { internal } from "./_generated/api";
+import { internalAction, internalMutation } from "./_generated/server";
+import { getStorageImageError } from "./lib/media";
 import { normalizePress } from "./lib/validation";
 
 const SLUG = "aterostop";
+const COVER_URL = "https://anwitch.me/images/aterostop/alat.webp";
 
 const PROJECT = {
   title: "ATEROSTOP",
@@ -80,7 +84,11 @@ ATEROSTOP adalah prototipe perangkat portabel noninvasif yang menggabungkan bebe
 - **Pemrosesan di perangkat.** Raspberry Pi 4 menjalankan pemrosesan sinyal dan inferensi model secara lokal, lalu menggabungkan seluruh hasil menjadi klasifikasi risiko aterosklerosis.
 - **Aplikasi mobile dan cloud** untuk menampilkan hasil, menyimpan riwayat, dan memberi rekomendasi tindak lanjut.
 
+![Prototipe perangkat ATEROSTOP dengan stetoskop untuk merekam suara arteri karotis](/images/aterostop/alat.webp)
+
 Proyek ini dikerjakan tim lima mahasiswa Universitas Tanjungpura dari Sistem Komputer, Teknik Informatika, Teknik Industri, dan Pendidikan Dokter, dan didanai melalui Program Kreativitas Mahasiswa Karsa Cipta (PKM-KC) Tahun Anggaran 2026. Setelah Penilaian Kemajuan Pelaksanaan PKM (PKP2) pada September 2026, tim kami dinyatakan lolos ke PIMNAS ke-39 di Universitas Diponegoro, 2–7 November 2026, sebagai salah satu dari 64 tim PKM-KC dan 420 tim dari seluruh bidang PKM.
+
+![Tim ATEROSTOP bersama dosen pendamping](/images/aterostop/tim.webp)
 
 ## Bagianku
 
@@ -93,6 +101,8 @@ Model AI, perangkat keras, dan seluruh program di sisi Raspberry Pi dikerjakan r
 - Dashboard hasil pemeriksaan yang diperbarui secara real-time.
 - Riwayat dengan grafik, ekspor CSV, dan pembaruan aplikasi over-the-air.
 - Rekomendasi tindak lanjut tiga tingkat (normal, waspada, perlu evaluasi) berdasarkan ambang klinis Kementerian Kesehatan dan PERKENI.
+
+![Ringkasan hasil pemeriksaan terakhir di aplikasi mobile ATEROSTOP](/images/aterostop/aplikasi.webp)
 
 **Merancang arsitektur sistemnya.** Aku merancang bagaimana perangkat, cloud, dan aplikasi saling berbicara: alur pairing, struktur data di Supabase, dan cara hasil pemeriksaan disinkronkan — termasuk saat perangkat dipakai tanpa internet. Rancangan itu menjadi kontrak yang diimplementasikan rekan tim di sisi perangkat dan olehku di sisi aplikasi.
 
@@ -184,5 +194,75 @@ export const apply = internalMutation({
     }
 
     return summary;
+  },
+});
+
+/**
+ * Sets the ATEROSTOP cover from a published image. Run via
+ * `npx convex run seedAterostop:setCover [--prod]` after the image is live on
+ * the site. Skips when the project already has a cover.
+ */
+export const setCover = internalAction({
+  args: { url: v.optional(v.string()) },
+  handler: async (ctx, args): Promise<string> => {
+    const url = args.url ?? COVER_URL;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Fetching ${url} failed with ${response.status}.`);
+    }
+    const storageId = await ctx.storage.store(await response.blob());
+    const result: string = await ctx.runMutation(
+      internal.seedAterostop.attachCover,
+      { storageId, originalName: url.split("/").pop() ?? "cover.webp" },
+    );
+    return result;
+  },
+});
+
+export const attachCover = internalMutation({
+  args: { storageId: v.id("_storage"), originalName: v.string() },
+  handler: async (ctx, args): Promise<string> => {
+    const project = await ctx.db
+      .query("projects")
+      .withIndex("by_slug", (q) => q.eq("slug", SLUG))
+      .unique();
+    if (!project || project.coverMediaId) {
+      await ctx.storage.delete(args.storageId);
+      return project
+        ? "skipped: project already has a cover"
+        : "skipped: run seedAterostop:apply first";
+    }
+
+    const metadata = await ctx.db.system.get("_storage", args.storageId);
+    const imageError = metadata ? getStorageImageError(metadata) : "missing";
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+    const admin = adminEmail
+      ? await ctx.db
+          .query("users")
+          .withIndex("email", (q) => q.eq("email", adminEmail))
+          .first()
+      : null;
+    if (!metadata || imageError || !admin) {
+      await ctx.storage.delete(args.storageId);
+      throw new Error(imageError ?? "Admin user not found (ADMIN_EMAIL).");
+    }
+
+    const now = Date.now();
+    const mediaId = await ctx.db.insert("media", {
+      storageId: args.storageId,
+      originalName: args.originalName,
+      contentType: metadata.contentType!.toLowerCase(),
+      size: metadata.size,
+      purpose: "project-cover",
+      altText: "Prototipe perangkat ATEROSTOP",
+      uploadedBy: admin._id,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await ctx.db.patch("projects", project._id, {
+      coverMediaId: mediaId,
+      updatedAt: now,
+    });
+    return "cover set";
   },
 });
