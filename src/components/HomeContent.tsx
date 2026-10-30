@@ -11,9 +11,8 @@ import {
   EmptyState,
   MonoLink,
   SectionHeading,
-  Skeleton,
 } from "@/components/ui";
-import { usePreloadedQuery, useQuery } from "convex/react";
+import { usePreloadedQuery } from "convex/react";
 import type { Preloaded } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
@@ -30,12 +29,14 @@ const NAV_ITEMS = [
 
 export default function HomeContent({
   preloadedProfile,
+  preloadedProjects,
   experiences,
 }: {
   preloadedProfile: Preloaded<typeof api.profile.get>;
+  preloadedProjects: Preloaded<typeof api.projects.getFeaturedProjects>;
   experiences: Doc<"experiences">[];
 }) {
-  const projects = useQuery(api.projects.getFeaturedProjects);
+  const projects = usePreloadedQuery(preloadedProjects);
   const profile = usePreloadedQuery(preloadedProfile);
   const [activeId, setActiveId] = useState<string>("ringkasan");
 
@@ -145,17 +146,11 @@ export default function HomeContent({
             <section id="proyek" className="mt-24 scroll-mt-24">
               <SectionHeading
                 title="Proyek Pilihan"
-                aside={`${projects?.length ?? 0} FEATURED MISSIONS`}
+                aside={`${projects.length} FEATURED MISSIONS`}
               />
 
               <div className="grid grid-cols-1 gap-10">
-                {projects === undefined ? (
-                  <div className="animate-pulse flex flex-col gap-4">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-8 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                  </div>
-                ) : projects.length === 0 ? (
+                {projects.length === 0 ? (
                   <EmptyState>No featured missions logged yet.</EmptyState>
                 ) : (
                   projects.map((project) => (
@@ -167,7 +162,7 @@ export default function HomeContent({
                       tags={project.tags}
                       link={project.link}
                       slug={project.slug}
-                      coverUrl={(project as { coverUrl?: string }).coverUrl}
+                      coverUrl={project.coverUrl}
                     />
                   ))
                 )}
@@ -192,29 +187,29 @@ export default function HomeContent({
                 <div className="flex flex-col md:flex-row justify-between md:items-baseline gap-2 mb-3">
                   <h3 className="text-2xl font-semibold text-ink">
                     {profile?.educationTitle ||
-                      "Otodidak & Pembelajaran Berkelanjutan"}
+                      "Informatika — Universitas Tanjungpura"}
                   </h3>
                   <span className="font-mono text-sm text-ink-muted">
-                    {profile?.educationPeriod || "2020 — SEKARANG"}
+                    {profile?.educationPeriod || "Sedang menempuh studi"}
                   </span>
                 </div>
                 <p className="text-lg text-ink-secondary leading-relaxed max-w-prose mb-6">
                   {profile?.educationDescription ||
-                    "Fokus mendalam pada arsitektur produk, sistem web full-stack, otomatisasi proses bisnis, dan integrasi AI agent untuk menyelesaikan masalah nyata."}
+                    "Mahasiswa Informatika Universitas Tanjungpura di Pontianak, Kalimantan Barat. Mendalami pengembangan perangkat lunak melalui perkuliahan dan proyek yang berangkat dari masalah nyata."}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-line">
                   <div className="flex flex-col gap-1">
                     <Eyebrow tone="muted">BIDANG FOKUS</Eyebrow>
                     <span className="text-base text-ink font-medium">
                       {profile?.educationFocus ||
-                        "Product Thinking & Architecture"}
+                        "Informatika & Pengembangan Perangkat Lunak"}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1">
                     <Eyebrow tone="muted">METODE</Eyebrow>
                     <span className="text-base text-ink font-medium">
                       {profile?.educationMethod ||
-                        "Project-Driven & First-Principles"}
+                        "Perkuliahan & Proyek"}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1">

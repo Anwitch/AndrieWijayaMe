@@ -1,0 +1,180 @@
+"use client";
+
+import { useEffect } from "react";
+import Link from "next/link";
+import PublicShell from "@/components/PublicShell";
+import { Button, Eyebrow, MonoLink, PageHeader } from "@/components/ui";
+import { usePaginatedQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
+import { api } from "../../convex/_generated/api";
+import { ArrowLeft, ExternalLink } from "lucide-react";
+
+export default function ProjectsArchive({
+  initialPage,
+}: {
+  initialPage: FunctionReturnType<typeof api.projects.listPublished>;
+}) {
+  const {
+    results: projectResults,
+    status: queryStatus,
+    loadMore,
+  } = usePaginatedQuery(
+    api.projects.listPublished,
+    {},
+    { initialNumItems: 50 },
+  );
+  // Keep the server-rendered page visible until the live first page is ready.
+  const isConnecting = queryStatus === "LoadingFirstPage";
+  const page = isConnecting ? initialPage.page : projectResults;
+  const projects = page.filter((project) => project !== null);
+  const status = isConnecting
+    ? initialPage.isDone
+      ? "Exhausted"
+      : "CanLoadMore"
+    : queryStatus;
+
+  useEffect(() => {
+    if (projects.length === 0 && queryStatus === "CanLoadMore") {
+      loadMore(50);
+    }
+  }, [loadMore, projects.length, queryStatus]);
+
+  return (
+    <PublicShell>
+      <main className="max-w-6xl mx-auto px-6 py-16 md:py-24 min-h-screen animate-fade-in-up">
+        <MonoLink href="/" className="mb-12">
+          <ArrowLeft size={14} /> Back to Profile
+        </MonoLink>
+
+        <PageHeader
+          eyebrow="Archive"
+          title="All Missions"
+          lede="A comprehensive log of all projects, experiments, and digital builds. Structured for archival reference."
+        />
+
+        <div className="border-t border-line">
+          <table className="w-full text-left border-collapse table-fixed">
+            <thead>
+              <tr className="border-b border-line font-mono text-xs uppercase tracking-widest text-ink-muted">
+                {/* Memberikan padding kiri (pl-6) pada kolom pertama */}
+                <th className="py-6 pl-6 pr-8 font-normal w-[15%]">Year</th>
+                <th className="py-6 font-normal w-[45%] md:w-[50%]">
+                  Mission Details
+                </th>
+                <th className="py-6 px-8 font-normal hidden md:table-cell w-[25%]">
+                  Built With
+                </th>
+                {/* Memberikan padding kanan (pr-6) pada kolom terakhir */}
+                <th className="py-6 pl-8 pr-6 font-normal text-right w-[15%] md:w-[10%]">
+                  Link
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
+              {projects.length === 0 && status === "Exhausted" ? (
+                <tr>
+                  <td colSpan={4}>
+                    <EmptyRow>No missions found in the logs.</EmptyRow>
+                  </td>
+                </tr>
+              ) : projects.length === 0 ? (
+                <tr>
+                  <td colSpan={4}>
+                    <EmptyRow>Scanning mission logs...</EmptyRow>
+                  </td>
+                </tr>
+              ) : (
+                projects.map((project) => (
+                  <tr
+                    key={project._id}
+                    className="group hover:bg-surface/50 transition-colors"
+                  >
+                    {/* Padding kiri yang sama dengan header */}
+                    <td className="py-8 pl-6 pr-8 align-top font-mono text-sm text-ink-muted whitespace-nowrap">
+                      {project.year}
+                    </td>
+                    <td className="py-8 align-top">
+                      {project.coverUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={project.coverUrl}
+                          alt={`Cover ${project.title}`}
+                          className="mb-4 h-28 w-full max-w-xs rounded-sm object-cover"
+                        />
+                      )}
+                      {project.slug ? (
+                        <Link
+                          href={`/projects/${project.slug}`}
+                          className="font-semibold text-lg text-ink group-hover:text-accent transition-colors leading-none"
+                        >
+                          {project.title}
+                        </Link>
+                      ) : (
+                        <div className="font-semibold text-lg text-ink group-hover:text-accent transition-colors leading-none">
+                          {project.title}
+                        </div>
+                      )}
+                      <div className="text-base text-ink-secondary mt-4 max-w-xl leading-relaxed">
+                        {project.description}
+                      </div>
+                      {project.slug && (
+                        <Link
+                          href={`/projects/${project.slug}`}
+                          className="inline-flex items-center gap-2 mt-4 font-mono text-xs uppercase tracking-widest text-ink-muted hover:text-accent transition-colors"
+                        >
+                          Studi Kasus →
+                        </Link>
+                      )}
+                    </td>
+                    <td className="py-8 px-8 align-top hidden md:table-cell">
+                      <Eyebrow className="whitespace-nowrap overflow-hidden text-ellipsis block">
+                        {project.tags}
+                      </Eyebrow>
+                    </td>
+                    {/* Padding kanan yang sama dengan header */}
+                    <td className="py-8 pl-8 pr-6 align-top text-right">
+                      {project.link ? (
+                        <a
+                          href={project.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-ink-muted hover:text-accent transition-colors"
+                        >
+                          <span className="text-xs font-mono uppercase tracking-widest hidden sm:inline">
+                            View
+                          </span>
+                          <ExternalLink size={14} />
+                        </a>
+                      ) : (
+                        <span className="text-ink-faint">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        {status !== "Exhausted" && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => loadMore(50)}
+            disabled={isConnecting || status === "LoadingMore"}
+            className="mt-10 w-full"
+          >
+            {status === "LoadingMore" ? "Loading Missions..." : "Load More Missions"}
+          </Button>
+        )}
+      </main>
+    </PublicShell>
+  );
+}
+
+function EmptyRow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="py-20 text-center">
+      <Eyebrow>{children}</Eyebrow>
+    </div>
+  );
+}

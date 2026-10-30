@@ -14,8 +14,9 @@ async function getExperiences(): Promise<Doc<"experiences">[]> {
 }
 
 export default async function Home() {
-  const [preloadedProfile, experiences] = await Promise.all([
+  const [preloadedProfile, preloadedProjects, experiences] = await Promise.all([
     preloadQuery(api.profile.get, {}),
+    preloadQuery(api.projects.getFeaturedProjects, {}),
     getExperiences(),
   ]);
 
@@ -31,6 +32,7 @@ export default async function Home() {
       )}
       <HomeContent
         preloadedProfile={preloadedProfile}
+        preloadedProjects={preloadedProjects}
         experiences={experiences}
       />
     </>

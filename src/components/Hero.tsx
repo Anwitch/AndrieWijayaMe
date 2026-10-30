@@ -20,6 +20,7 @@ export default function Hero({
 
   const defaultTagline =
     "Problem solver dan product thinker yang berbasis di Pontianak, Kalimantan Barat.";
+  const socials = socialLinks(profile);
 
   return (
     <section className="flex flex-col md:flex-row items-center md:items-start gap-12 py-16 animate-fade-in-up">
@@ -37,28 +38,11 @@ export default function Hero({
         </div>
       </div>
 
-      {/* Nama dan Social Icons */}
+      {/* Identitas dan kontak */}
       <div className="flex flex-col justify-center pt-4 w-full">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-          <h1 className="text-5xl md:text-6xl font-bold text-ink tracking-tight">
-            {settings.siteName}
-          </h1>
-          {/* Ikon Media Sosial */}
-          <div className="flex gap-4">
-            {socialLinks(profile).map((social) => (
-              <a
-                key={social.key}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${settings.siteName} on ${social.label}`}
-                className="bg-ink text-paper p-2 rounded-full w-10 h-10 flex items-center justify-center text-xs font-semibold hover:bg-ink-secondary transition-colors"
-              >
-                {social.short}
-              </a>
-            ))}
-          </div>
-        </div>
+        <h1 className="text-5xl md:text-6xl font-bold text-ink tracking-tight">
+          {settings.siteName}
+        </h1>
         <div className="text-lg text-ink-secondary mt-6 leading-relaxed max-w-2xl">
           {isPublic ? (
             (profile?.tagline ?? defaultTagline)
@@ -72,6 +56,30 @@ export default function Hero({
             />
           )}
         </div>
+        {socials.length > 0 && (
+          <nav
+            aria-label="Kontak dan profil sosial"
+            className="mt-8 flex flex-wrap gap-3"
+          >
+            {socials.map((social) => (
+              <a
+                key={social.key}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex min-h-11 items-center justify-center rounded-sm border px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink ${
+                  social.key === "linkedinUrl"
+                    ? "border-ink bg-ink text-paper hover:bg-ink-secondary"
+                    : "border-line text-ink hover:bg-surface"
+                }`}
+              >
+                {social.key === "linkedinUrl"
+                  ? "Hubungi saya di LinkedIn"
+                  : social.label}
+              </a>
+            ))}
+          </nav>
+        )}
       </div>
     </section>
   );
