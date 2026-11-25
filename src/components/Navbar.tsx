@@ -65,6 +65,10 @@ export default function Navbar() {
               {item.name}
             </MonoLink>
           ))}
+          {/* /lab is a separate static app proxied via next.config rewrites. */}
+          <MonoLink href="/lab" fullReload>
+            Lab
+          </MonoLink>
         </div>
       </div>
     </nav>

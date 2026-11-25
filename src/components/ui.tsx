@@ -126,15 +126,25 @@ export function Button({
 export function MonoLink({
   href,
   external = false,
+  fullReload = false,
   className = "",
   children,
 }: {
   href: string;
   external?: boolean;
+  /** Same tab, full page load: for paths served by another app via rewrites (e.g. /lab). */
+  fullReload?: boolean;
   className?: string;
   children: ReactNode;
 }) {
   const classes = `inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-ink-muted transition-colors hover:text-ink ${className}`;
+  if (fullReload) {
+    return (
+      <a href={href} className={classes}>
+        {children}
+      </a>
+    );
+  }
   if (external) {
     return (
       <a
