@@ -24,23 +24,27 @@ export default function Hero({
 
   return (
     <section className="flex flex-col md:flex-row items-center md:items-start gap-12 py-16 animate-fade-in-up">
-      {/* Foto Profil Lingkaran */}
+      {/* Foto Profil Kotak */}
       <div className="flex-shrink-0">
-        <div className="w-48 h-48 md:w-64 md:h-64 overflow-hidden rounded-full border-4 border-line shadow-sm">
+        <div className="relative w-48 aspect-[3/4] md:w-60 overflow-hidden rounded-sm border border-line shadow-sm bg-surface">
           <Image
             src={profile?.avatarUrl ?? "/FotoAndrieGantengKacamata.webp"}
             alt={profile?.avatarAltText ?? settings.siteName}
-            width={256}
-            height={256}
+            width={360}
+            height={480}
             preload
             className="w-full h-full object-cover"
           />
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent" />
         </div>
       </div>
 
       {/* Identitas dan kontak */}
       <div className="flex flex-col justify-center pt-4 w-full">
-        <h1 className="text-5xl md:text-6xl font-bold text-ink tracking-tight">
+        <h1
+          data-witch-text
+          className="text-4xl md:text-5xl lg:text-6xl font-semibold text-ink tracking-tight"
+        >
           {settings.siteName}
         </h1>
         <div className="text-lg text-ink-secondary mt-6 leading-relaxed max-w-2xl">

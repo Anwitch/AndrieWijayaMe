@@ -56,14 +56,17 @@ export default async function AboutPage() {
         <PageHeader eyebrow="Profil" title={`Tentang ${settings.siteName}`} />
 
         <div className="flex flex-col sm:flex-row gap-8 items-start mb-16">
-          <Image
-            src="/FotoAndrieGantengKacamata.webp"
-            alt={`Foto ${settings.siteName}, product thinker dan problem solver dari Pontianak`}
-            width={160}
-            height={160}
-            className="rounded-sm shrink-0"
-            priority
-          />
+          <div className="relative w-44 aspect-[3/4] shrink-0 overflow-hidden rounded-sm border border-line shadow-sm bg-surface">
+            <Image
+              src={profile?.avatarUrl ?? "/FotoAndrieGantengKacamata.webp"}
+              alt={profile?.avatarAltText ?? `Foto ${settings.siteName}, product thinker dan problem solver dari Pontianak`}
+              width={300}
+              height={400}
+              className="w-full h-full object-cover"
+              preload
+            />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-accent" />
+          </div>
           <div className="text-lg text-ink-secondary leading-relaxed">
             <p>
               Aku {settings.siteName}, seorang{" "}

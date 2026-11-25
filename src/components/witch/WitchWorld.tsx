@@ -11,6 +11,7 @@ import {
   type RefObject,
 } from "react";
 import { PixelWitchSprite } from "@/components/witch/sprites";
+import WitchMagicOverlay from "@/components/witch/WitchMagicOverlay";
 
 /** Dispatch this window event to summon a takeoff (used by the navbar logo). */
 export const WITCH_FLY_EVENT = "andwitch:fly";
@@ -18,7 +19,7 @@ export const WITCH_FLY_EVENT = "andwitch:fly";
 /**
  * The witch's day, as a cycle with ONE continuous witch:
  *
- *   home --(3-5 min / logo click)--> takeoff (walks to her broom in the
+ *   home --(3-5 min / logo or diorama click / key 'W' or 'B')--> takeoff (walks to her broom in the
  *   diorama) --> flying (a single fixed-position witch lifts off FROM the
  *   broom's on-screen position, arcs up, crosses the viewport, comes back
  *   and lands on the same spot — driven by the Web Animations API)
@@ -30,11 +31,14 @@ type WitchWorldContext = {
   phase: WitchPhase;
   /** FooterScene attaches this to an invisible marker at the broom spot. */
   anchorRef: RefObject<HTMLDivElement | null>;
+  /** Programmatically summon flight from anywhere in the app */
+  summonFlight: () => void;
 };
 
 const WitchContext = createContext<WitchWorldContext>({
   phase: "home",
   anchorRef: { current: null },
+  summonFlight: () => {},
 });
 
 export function useWitchWorld() {
@@ -69,6 +73,8 @@ export function WitchProvider({ children }: { children: ReactNode }) {
 
   const begin = useCallback(() => {
     if (busyRef.current) return;
+    // Clicks on the diorama call this directly, so honour reduced motion here too.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     busyRef.current = true;
     setPhase("takeoff");
     timerRef.current = window.setTimeout(() => {
@@ -83,9 +89,31 @@ export function WitchProvider({ children }: { children: ReactNode }) {
     }
     timerRef.current = window.setTimeout(begin, FIRST_FLIGHT_DELAY_MS);
     window.addEventListener(WITCH_FLY_EVENT, begin);
+
+    // Global keyboard shortcut ('W' or 'B' to fly). Skip browser/OS shortcuts
+    // such as Ctrl+B or Cmd+W, and held-down repeats.
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+      if (e.key === "w" || e.key === "W" || e.key === "b" || e.key === "B") {
+        const target = e.target as HTMLElement | null;
+        const tag = (target?.tagName || "").toLowerCase();
+        if (
+          tag === "input" ||
+          tag === "textarea" ||
+          tag === "select" ||
+          target?.isContentEditable
+        ) {
+          return;
+        }
+        begin();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+
     return () => {
       if (timerRef.current !== null) window.clearTimeout(timerRef.current);
       window.removeEventListener(WITCH_FLY_EVENT, begin);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [begin]);
 
@@ -215,8 +243,13 @@ export function WitchProvider({ children }: { children: ReactNode }) {
   }, [flightId, begin]);
 
   return (
-    <WitchContext.Provider value={{ phase, anchorRef }}>
+    <WitchContext.Provider value={{ phase, anchorRef, summonFlight: begin }}>
       {children}
+      <WitchMagicOverlay
+        overlayRef={overlayRef}
+        facingLeft={facingLeft}
+        isActive={flightId !== null}
+      />
       {flightId !== null && (
         <div
           ref={overlayRef}

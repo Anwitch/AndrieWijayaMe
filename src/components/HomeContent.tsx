@@ -76,7 +76,7 @@ export default function HomeContent({
         <Hero profile={profile} isPublic />
         <MetadataStrip profile={profile} isPublic />
 
-        <hr className="my-12 border-line" />
+        <hr data-witch-reactive="border" className="my-12 border-line transition-colors" />
 
         <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-16 items-start">
           {/* Sidebar Navigasi (ISI) */}
@@ -154,7 +154,7 @@ export default function HomeContent({
                   <EmptyState>No featured missions logged yet.</EmptyState>
                 ) : (
                   projects.map((project) => (
-                    <ProjectCardNASA
+                    <ProjectCard
                       key={project._id}
                       title={project.title}
                       description={project.description}
@@ -327,7 +327,7 @@ export default function HomeContent({
   );
 }
 
-function ProjectCardNASA({
+function ProjectCard({
   title,
   description,
   year,
@@ -347,7 +347,8 @@ function ProjectCardNASA({
   const hasTarget = Boolean(slug || link);
   const CardContent = (
     <div
-      className={`border-b border-line pb-8 group hover:bg-surface transition-colors px-4 -mx-4 h-full ${hasTarget ? "cursor-pointer" : ""}`}
+      data-witch-reactive="card"
+      className={`border-b border-line pb-8 group hover:bg-surface transition-colors px-4 -mx-4 h-full rounded-sm ${hasTarget ? "cursor-pointer" : ""}`}
     >
       {coverUrl && (
         // eslint-disable-next-line @next/next/no-img-element
@@ -358,7 +359,10 @@ function ProjectCardNASA({
         />
       )}
       <Eyebrow>{tags}</Eyebrow>
-      <h3 className="text-2xl font-semibold mt-2 group-hover:text-accent transition-colors flex items-baseline justify-between gap-4">
+      <h3
+        data-witch-text
+        className="text-2xl font-semibold mt-2 group-hover:text-accent transition-colors flex items-baseline justify-between gap-4"
+      >
         <span>{title}</span>
         <span className="text-lg font-normal text-ink-faint tabular-nums">
           ({year})
@@ -401,4 +405,3 @@ function ProjectCardNASA({
 
   return CardContent;
 }
-

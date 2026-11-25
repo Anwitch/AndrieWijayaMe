@@ -34,7 +34,7 @@ export default function ProfileImageEditor({ profile }: { profile: Profile }) {
     <div className="space-y-3">
       <Eyebrow as="div">Profile Image</Eyebrow>
       <div className="flex items-center gap-4 border border-line bg-surface p-3">
-        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-paper bg-surface shadow-sm">
+        <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-sm border border-line bg-surface shadow-sm">
           <Image
             src={avatarUrl}
             alt={profile?.avatarAltText ?? "Current profile image"}

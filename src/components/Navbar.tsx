@@ -52,8 +52,10 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6">
         <Link
           href="/"
+          data-witch-text
           onClick={() => window.dispatchEvent(new Event(WITCH_FLY_EVENT))}
-          className="min-w-0 truncate font-mono text-xs font-semibold uppercase tracking-widest text-ink"
+          className="min-w-0 truncate font-mono text-xs font-semibold uppercase tracking-widest text-ink hover:text-accent transition-colors"
+          title="Click to summon flight (or press 'W')"
         >
           {settings.siteName}
         </Link>

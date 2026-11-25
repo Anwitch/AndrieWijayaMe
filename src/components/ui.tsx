@@ -58,7 +58,10 @@ export function PageHeader({
           {eyebrow}
         </Eyebrow>
       )}
-      <h1 className="text-4xl font-semibold leading-tight text-ink md:text-5xl">
+      <h1
+        data-witch-text
+        className="text-4xl font-semibold leading-tight text-ink md:text-5xl"
+      >
         {title}
       </h1>
       <div className="mt-6 h-1 w-16 bg-ink" />
@@ -82,8 +85,13 @@ export function SectionHeading({
   aside?: ReactNode;
 }) {
   return (
-    <div className="mb-10 flex items-end justify-between border-b border-line pb-4">
-      <h2 className="text-3xl font-semibold text-ink md:text-4xl">{title}</h2>
+    <div
+      data-witch-reactive="border"
+      className="mb-10 flex items-end justify-between border-b border-line pb-4 transition-colors"
+    >
+      <h2 data-witch-text className="text-3xl font-semibold text-ink md:text-4xl">
+        {title}
+      </h2>
       {aside && <Eyebrow className="hidden md:block">{aside}</Eyebrow>}
     </div>
   );
