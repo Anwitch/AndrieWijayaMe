@@ -13,10 +13,20 @@ const convexStoragePattern = convexUrl
     })()
   : undefined;
 
+// Lab (mini project, tools, game) di-host terpisah di repo anwitch-lab.
+// Semua /lab/* diteruskan ke sana, jadi menambah project lab tidak perlu menyentuh repo ini.
+const labOrigin = process.env.LAB_ORIGIN ?? "https://anwitch-lab.vercel.app";
+
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
     remotePatterns: convexStoragePattern ? [convexStoragePattern] : [],
+  },
+  async rewrites() {
+    return [
+      { source: "/lab", destination: `${labOrigin}/lab` },
+      { source: "/lab/:path*", destination: `${labOrigin}/lab/:path*` },
+    ];
   },
 };
 
