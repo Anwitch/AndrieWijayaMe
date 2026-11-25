@@ -72,8 +72,6 @@ Diukur di board AMD Kria KV260 pada 100 MHz:
 - Tambahan daya 0,058 W saat skrining, 3,7× lebih hemat dibanding ARM Cortex-A53 di chip yang sama, padahal ARM hanya menjalankan filter front-end.
 - 514 clock per sampel tiga kanal, 13× lebih sedikit dari ARM, dan hanya memakai 6 dari 1.248 multiplier (0,5%).
 
-Data uji berasal dari rekaman orang dewasa di PhysioNet, jadi angka di atas menguji algoritma dan hardware-nya, bukan klaim klinis. Langkah berikutnya adalah ethical clearance dan pengambilan data bayi bersama rumah sakit mitra.
-
 ![Peserta dan panitia Hackathon Deeptech 2026](/images/otirra/peserta-hackathon.webp)
 
 ## Teknologi

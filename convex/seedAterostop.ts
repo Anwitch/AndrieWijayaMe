@@ -13,10 +13,16 @@ const PROJECT = {
   tags: "Flutter, Supabase, IoT, AI",
   link: "https://dikti.kemdiktisaintek.go.id/publikasi/berita/mahasiswa-universitas-tanjungpura-kembangkan-aterostop-perangkat-ai-untuk-deteksi-dini-aterosklerosis-karotis",
   description:
-    "Prototipe perangkat biomedis portabel berbasis AI untuk deteksi dini aterosklerosis pada arteri karotis, didanai PKM-KC 2026 dan lolos ke PIMNAS ke-39. Aku membangun aplikasi mobile Flutter-nya dan merancang arsitektur pairing serta sinkronisasi data antara perangkat, cloud, dan aplikasi.",
+    "Prototipe perangkat biomedis portabel berbasis AI untuk deteksi dini aterosklerosis pada arteri karotis, didanai PKM-KC 2026 dan meraih Juara Favorit kategori presentasi kelas PKM-KC1 di PIMNAS ke-39. Aku membangun aplikasi mobile Flutter-nya dan merancang arsitektur pairing serta sinkronisasi data antara perangkat, cloud, dan aplikasi.",
 };
 
 const PRESS = [
+  {
+    publisher: "PIMNAS ke-39, Universitas Diponegoro",
+    title: "Malam Penutupan PIMNAS ke-39 Umumkan Peraih Penghargaan",
+    url: "https://pimnas39.undip.ac.id/malam-penutupan-pimnas-ke-39-umumkan-peraih-penghargaan/",
+    date: "2026-11-07",
+  },
   {
     publisher: "Kemdiktisaintek (Ditjen Dikti)",
     title:
@@ -60,10 +66,10 @@ const PRESS = [
 ];
 
 const EXPERIENCE = {
-  title: "ATEROSTOP — PKM Karsa Cipta 2026, Lolos PIMNAS ke-39",
+  title: "ATEROSTOP — PKM Karsa Cipta 2026, Juara Favorit PIMNAS ke-39",
   period: "2026",
   description:
-    "Anggota tim lima mahasiswa lintas disiplin Universitas Tanjungpura yang mengembangkan ATEROSTOP, prototipe perangkat biomedis berbasis AI untuk deteksi dini aterosklerosis pada arteri karotis. Program ini didanai melalui PKM-KC Tahun Anggaran 2026, lalu lolos ke Pekan Ilmiah Mahasiswa Nasional (PIMNAS) ke-39 sebagai salah satu dari 64 tim PKM-KC se-Indonesia. Aku membangun aplikasi mobile-nya dan merancang arsitektur sistem: alur pairing dan struktur data untuk sinkronisasi antara perangkat, cloud, dan aplikasi.",
+    "Anggota tim lima mahasiswa lintas disiplin Universitas Tanjungpura yang mengembangkan ATEROSTOP, prototipe perangkat biomedis berbasis AI untuk deteksi dini aterosklerosis pada arteri karotis. Program ini didanai melalui PKM-KC Tahun Anggaran 2026, lalu lolos ke Pekan Ilmiah Mahasiswa Nasional (PIMNAS) ke-39 sebagai salah satu dari 64 tim PKM-KC se-Indonesia, dan meraih Juara Favorit kategori presentasi kelas PKM-KC1. Aku membangun aplikasi mobile-nya dan merancang arsitektur sistem: alur pairing dan struktur data untuk sinkronisasi antara perangkat, cloud, dan aplikasi.",
   role: "Aplikasi Mobile & Arsitektur Sistem",
   capabilities: "Flutter, Supabase",
   base: "Universitas Tanjungpura, Pontianak",
@@ -86,7 +92,9 @@ ATEROSTOP adalah prototipe perangkat portabel noninvasif yang menggabungkan bebe
 
 ![Prototipe perangkat ATEROSTOP dengan stetoskop untuk merekam suara arteri karotis](/images/aterostop/alat.webp)
 
-Proyek ini dikerjakan tim lima mahasiswa Universitas Tanjungpura dari Sistem Komputer, Teknik Informatika, Teknik Industri, dan Pendidikan Dokter, dan didanai melalui Program Kreativitas Mahasiswa Karsa Cipta (PKM-KC) Tahun Anggaran 2026. Setelah Penilaian Kemajuan Pelaksanaan PKM (PKP2) pada September 2026, tim kami dinyatakan lolos ke PIMNAS ke-39 di Universitas Diponegoro, 2–7 November 2026, sebagai salah satu dari 64 tim PKM-KC dan 420 tim dari seluruh bidang PKM.
+Proyek ini dikerjakan tim lima mahasiswa Universitas Tanjungpura dari Sistem Komputer, Teknik Informatika, Teknik Industri, dan Pendidikan Dokter, dan didanai melalui Program Kreativitas Mahasiswa Karsa Cipta (PKM-KC) Tahun Anggaran 2026. Setelah Penilaian Kemajuan Pelaksanaan PKM (PKP2) pada September 2026, tim kami dinyatakan lolos ke PIMNAS ke-39 di Universitas Diponegoro, 2–7 November 2026, sebagai salah satu dari 64 tim PKM-KC dan 420 tim dari seluruh bidang PKM. Di malam penutupan PIMNAS, ATEROSTOP meraih Juara Favorit kategori presentasi kelas PKM-KC1.
+
+![Papan Juara Favorit kategori presentasi kelas PKM-KC1 PIMNAS ke-39](/images/aterostop/juara-favorit.webp)
 
 ![Tim ATEROSTOP bersama dosen pendamping](/images/aterostop/tim.webp)
 
@@ -116,10 +124,10 @@ Pemisahan ini juga membuat dua sisi bisa dikerjakan paralel. Selama struktur dat
 
 - **Sensor.** Dari 50 rekaman, sensor PPG mencapai sampling rate rata-rata 191,36 Hz (95,68% dari target 200 Hz) tanpa flatline maupun clipping ADC. Saat kedua sensor merekam bersamaan, puncak sinyalnya cocok secara waktu 96,70%.
 - **Estimasi.** Pada 35 subjek dengan 149 pasangan pengukuran per parameter, MAE tekanan darah sistolik 9,83 mmHg dan diastolik 14,11 mmHg, glukosa 18,52 mg/dL, dan kolesterol 23,98 mg/dL.
-- **Klasifikasi.** Pada uji awal (5 subjek, 25 pemeriksaan), akurasi 80% dengan AUC 0,825 untuk aterosklerosis dan 0,85 untuk deteksi bruit.
+- **Klasifikasi.** Dibandingkan USG Doppler (5 subjek, 25 pemeriksaan), akurasi 80% dengan AUC 0,825 untuk aterosklerosis dan 0,85 untuk deteksi bruit.
 - **Penerimaan.** Survei terhadap 175 responden menghasilkan indeks penerimaan 89,72%.
 
-ATEROSTOP masih berupa prototipe skrining awal, bukan alat diagnosis. Jumlah subjek uji klasifikasi masih kecil, sehingga pengujian klinis dengan subjek yang lebih banyak menjadi langkah berikutnya. Galat estimasi diastolik, glukosa, dan kolesterol juga masih perlu diperkecil.
+Pengujian dengan subjek manusia dilakukan setelah mendapat persetujuan etik dari Komite Etik Penelitian Kesehatan RSUD dr. Soedarso, dan paten sederhana untuk ATEROSTOP sudah diajukan.
 
 ## Artikel Ilmiah
 

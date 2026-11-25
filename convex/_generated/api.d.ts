@@ -25,6 +25,7 @@ import type * as seedEntity from "../seedEntity.js";
 import type * as seedEvenizer from "../seedEvenizer.js";
 import type * as seedMousePointer from "../seedMousePointer.js";
 import type * as seedOtirra from "../seedOtirra.js";
+import type * as seedPermata from "../seedPermata.js";
 import type * as siteSettings from "../siteSettings.js";
 
 import type {
@@ -51,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   seedEvenizer: typeof seedEvenizer;
   seedMousePointer: typeof seedMousePointer;
   seedOtirra: typeof seedOtirra;
+  seedPermata: typeof seedPermata;
   siteSettings: typeof siteSettings;
 }>;
 
